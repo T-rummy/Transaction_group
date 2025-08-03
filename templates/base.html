@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title or "Transaction Tracker" }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-200 shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
+        <div class="flex items-center space-x-4">
+            <span class="text-lg font-bold text-blue-600">💳 ExpenseTrack</span>
+            <a href="/" class="text-gray-600 hover:text-blue-600">Add</a>
+            <a href="/transactions" class="text-gray-600 hover:text-blue-600">All Expenses</a>
+            <a href="/modify" class="text-gray-600 hover:text-blue-600">Modify</a>
+            <a href="/stats" class="text-gray-600 hover:text-blue-600">Analytics</a>
+        </div>
+        <div class="flex items-center space-x-3">
+            <span class="text-gray-500 text-sm">Welcome, User</span>
+            <button class="px-3 py-1 text-sm bg-blue-600 text-white rounded">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="p-6">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
