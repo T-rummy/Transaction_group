@@ -109,15 +109,33 @@ def stats():
             .apply(pd.to_numeric, errors="coerce")
         )
 
-    # Ensure Date is string and drop NaN dates
+    # Ensure Date is string and filter invalid dates
     if "Date" in df.columns:
         df["Date"] = df["Date"].astype(str)
-        df = df[df["Date"].str.contains("/")]  # Keep only valid date rows
+        df = df[df["Date"].str.contains("/")]  # keep only valid date rows
 
-    # Group by Category
+    # Remove invalid rows where Amount is NaN
+    df = df.dropna(subset=["Amount"])
+
+    # Summary stats
+    total_expenses = df["Amount"].sum() if not df.empty else 0
+    total_transactions = len(df) if not df.empty else 0
+
+    avg_daily = 0
+    avg_monthly = 0
+    if not df.empty:
+        df["Day"] = df["Date"]
+        daily_totals = df.groupby("Day")["Amount"].sum()
+        avg_daily = daily_totals.mean() if not daily_totals.empty else 0
+
+        df["Month"] = df["Date"].apply(lambda x: str(x).split('/')[0])
+        monthly_totals_calc = df.groupby("Month")["Amount"].sum()
+        avg_monthly = monthly_totals_calc.mean() if not monthly_totals_calc.empty else 0
+
+    # Category totals
     category_totals = df.groupby("Category")["Amount"].sum().to_dict() if not df.empty else {}
 
-    # Group by Month
+    # Monthly totals for chart
     monthly_totals = {}
     if not df.empty:
         monthly_totals = (
@@ -128,11 +146,16 @@ def stats():
 
     return render_template(
         "stats.html",
+        total_expenses=total_expenses,
+        total_transactions=total_transactions,
+        avg_daily=avg_daily,
+        avg_monthly=avg_monthly,
         categories=list(category_totals.keys()),
         category_data=list(category_totals.values()),
         months=list(monthly_totals.keys()),
         monthly_data=list(monthly_totals.values())
     )
+
 
 
 
