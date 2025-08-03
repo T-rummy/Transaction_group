@@ -1,13 +1,42 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
+h2 {
+    font-weight: 600;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.table th {
+    background: #343a40;
+    color: white;
     text-align: center;
-    margin-top: 50px;
+}
+
+.table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.btn {
+    min-width: 90px;
+}
+
+.form-control, .form-select {
+    border-radius: 6px;
 }
