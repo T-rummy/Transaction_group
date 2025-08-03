@@ -1,127 +1,140 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-
+from flask import Flask, render_template, request, redirect, flash
 import pandas as pd
 import os
 from datetime import date
 
 app = Flask(__name__)
+app.secret_key = "supersecretkey"  # Needed for flash messages
 
 CSV_FILE = "file.csv"
 
-# Ensure CSV file has proper columns
+# Ensure CSV exists with correct columns
 if not os.path.exists(CSV_FILE):
-    pd.DataFrame(columns=["Name", "Amount", "Category", "Extra1", "Extra2", "Date"]).to_csv(CSV_FILE, index=False)
-else:
-    df = pd.read_csv(CSV_FILE)
-    df = df.fillna("")  # Clean NaN from previous runs
+    df = pd.DataFrame(columns=["Id", "Name", "Amount", "Category", "Extra1", "Extra2", "Date"])
     df.to_csv(CSV_FILE, index=False)
 
+
+# ===========================
+# ROUTES
+# ===========================
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
+# Transactions Page
 @app.route('/transactions')
 def transactions():
-    if os.path.exists(CSV_FILE):
-        df = pd.read_csv(CSV_FILE)
-    else:
-        df = pd.DataFrame(columns=["Name", "Amount", "Category", "Extra1", "Extra2", "Date"])
+    df = pd.read_csv(CSV_FILE)
 
-    return render_template('transactions.html', transactions=df.to_dict(orient='records'))
+    # Ensure Amount is numeric
+    if "Amount" in df.columns:
+        df["Amount"] = (
+            df["Amount"].replace('[\$,]', '', regex=True)
+            .apply(pd.to_numeric, errors="coerce")
+        )
+
+    return render_template("transactions.html", transactions=df.to_dict(orient="records"))
 
 
+# Add Transaction
 @app.route('/add', methods=['GET', 'POST'])
 def add_transaction():
     if request.method == 'POST':
-        name = request.form['name']
-        amount = request.form['amount']
-        category = request.form['category']
+        df = pd.read_csv(CSV_FILE)
 
-        # Handle optional fields safely
-        extra1 = request.form.get('extra1') or ""
-        extra2 = request.form.get('extra2') or ""
+        new_transaction = {
+            "Id": len(df) + 1,
+            "Name": request.form.get("name"),
+            "Amount": request.form.get("amount"),
+            "Category": request.form.get("category"),
+            "Extra1": request.form.get("extra1", ""),
+            "Extra2": request.form.get("extra2", ""),
+            "Date": date.today().strftime("%m/%d/%Y")
+        }
 
-        df = pd.DataFrame([{
-            'Name': name,
-            'Amount': amount,
-            'Category': category,
-            'Extra1': extra1,
-            'Extra2': extra2,
-            'Date': date.today().strftime('%m/%d/%Y')
-        }])
+        df = pd.concat([df, pd.DataFrame([new_transaction])], ignore_index=True)
+        df.to_csv(CSV_FILE, index=False)
 
-        file_exists = os.path.exists(CSV_FILE)
-        df.to_csv(CSV_FILE, mode='a', index=False, header=not file_exists)
-
+        flash("Transaction added successfully!")
         return redirect('/transactions')
 
-    return render_template('add.html')
+    return render_template("add.html")
 
 
-@app.route('/modify/<int:transaction_id>', methods=['GET', 'POST'])
-def modify(transaction_id):
-    df = pd.read_csv("file.csv")
-
-    # Find the transaction
-    transaction = df[df['Id'] == transaction_id]
-
-    if transaction.empty:
-        flash("Transaction not found!", "danger")
-        return redirect('/transactions')
+# Modify Transaction
+@app.route('/modify', methods=['GET', 'POST'])
+def modify():
+    df = pd.read_csv(CSV_FILE)
 
     if request.method == 'POST':
-        name = request.form.get('name')
-        amount = request.form.get('amount')
-        category = request.form.get('category')
+        try:
+            transaction_id = int(request.form['id'])
+            column = request.form['column']
+            new_value = request.form['value']
 
-        # Update fields in the dataframe
-        df.loc[df['Id'] == transaction_id, 'Name'] = name
-        df.loc[df['Id'] == transaction_id, 'Amount'] = float(amount) if amount else 0
-        df.loc[df['Id'] == transaction_id, 'Category'] = category
+            if column == "Amount":
+                new_value = float(new_value)
 
-        df.to_csv("file.csv", index=False)
-        flash("Transaction updated successfully!", "success")
-        return redirect('/transactions')
+            df.loc[df['Id'] == transaction_id, column] = new_value
+            df.to_csv(CSV_FILE, index=False)
+            flash("Transaction updated successfully!")
+            return redirect('/transactions')
 
-    # Get transaction data for the form
-    transaction_data = transaction.iloc[0].to_dict()
-    return render_template('modify.html', transaction=transaction_data)
+        except Exception as e:
+            flash(f"Error updating transaction: {str(e)}")
 
-
+    return render_template("modify.html", transactions=df.to_dict(orient='records'))
 
 
-@app.route('/delete/<int:transaction_id>')
+# Delete Transaction
+@app.route('/delete/<int:transaction_id>', methods=['POST'])
 def delete_transaction(transaction_id):
     df = pd.read_csv(CSV_FILE)
-    df = df.drop(transaction_id)
+    df = df[df["Id"] != transaction_id]
     df.to_csv(CSV_FILE, index=False)
+    flash("Transaction deleted successfully!")
     return redirect('/transactions')
 
 
 @app.route('/stats')
 def stats():
-    if not os.path.exists(CSV_FILE):
-        return render_template('stats.html', total_by_category={}, avg_daily=0, avg_monthly=0)
-
     df = pd.read_csv(CSV_FILE)
-    if df.empty:
-        return render_template('stats.html', total_by_category={}, avg_daily=0, avg_monthly=0)
 
-    df['Amount'] = pd.to_numeric(df['Amount'], errors='coerce').fillna(0)
-    df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+    # Ensure Amount is numeric
+    if "Amount" in df.columns:
+        df["Amount"] = (
+            df["Amount"].replace('[\$,]', '', regex=True)
+            .apply(pd.to_numeric, errors="coerce")
+        )
 
-    total_by_category = df.groupby('Category')['Amount'].sum().to_dict()
+    # Ensure Date is string and drop NaN dates
+    if "Date" in df.columns:
+        df["Date"] = df["Date"].astype(str)
+        df = df[df["Date"].str.contains("/")]  # Keep only valid date rows
 
-    daily_avg = df.groupby(df['Date'].dt.date)['Amount'].sum().mean()
-    monthly_avg = df.groupby(df['Date'].dt.to_period('M'))['Amount'].sum().mean()
+    # Group by Category
+    category_totals = df.groupby("Category")["Amount"].sum().to_dict() if not df.empty else {}
 
-    return render_template('stats.html',
-                           total_by_category=total_by_category,
-                           avg_daily=round(daily_avg, 2),
-                           avg_monthly=round(monthly_avg, 2))
+    # Group by Month
+    monthly_totals = {}
+    if not df.empty:
+        monthly_totals = (
+            df.groupby(df["Date"].apply(lambda x: str(x).split('/')[0]))["Amount"]
+            .sum()
+            .to_dict()
+        )
+
+    return render_template(
+        "stats.html",
+        categories=list(category_totals.keys()),
+        category_data=list(category_totals.values()),
+        months=list(monthly_totals.keys()),
+        monthly_data=list(monthly_totals.values())
+    )
 
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app.run(debug=True)
