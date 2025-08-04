@@ -2,17 +2,31 @@ from flask import Flask, render_template, request, redirect, flash
 import pandas as pd
 import os
 from datetime import date
+from Transaction_pt2 import Transaction, FoodTransaction, TravelTransaction, TransportationTransaction, BillsUtilitiesTransaction, AcademicTransaction, HealthTransaction
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  # Needed for flash messages
+app.secret_key = "supersecretkey"
 
 CSV_FILE = "file.csv"
 
-# Ensure CSV exists with correct columns
+# Ensure CSV exists with all columns
 if not os.path.exists(CSV_FILE):
-    df = pd.DataFrame(columns=["Id", "Name", "Amount", "Category", "Extra1", "Extra2", "Date"])
+    df = pd.DataFrame(columns=[
+        "Id", "Name", "Amount", "Date", "Category",
+        "Subcategory", "Location",
+        "Destination", "Transport_Mode",
+        "Transport_Type",
+        "Bill_Type", "Provider",
+        "Academic_Type", "Institution",
+        "Health_Type"
+    ])
     df.to_csv(CSV_FILE, index=False)
 
+# Load existing IDs into Transaction._used_ids to prevent duplicates
+if os.path.exists(CSV_FILE):
+    df = pd.read_csv(CSV_FILE)
+    if "Id" in df.columns:
+        Transaction._used_ids = set(df["Id"].dropna().astype(int))
 
 # ===========================
 # ROUTES
@@ -41,28 +55,55 @@ def transactions():
 
 
 # Add Transaction
+from datetime import date
+
 @app.route('/add', methods=['GET', 'POST'])
 def add_transaction():
     if request.method == 'POST':
         df = pd.read_csv(CSV_FILE)
 
-        new_transaction = {
-            "Id": len(df) + 1,
-            "Name": request.form.get("name"),
-            "Amount": request.form.get("amount"),
-            "Category": request.form.get("category"),
-            "Extra1": request.form.get("extra1", ""),
-            "Extra2": request.form.get("extra2", ""),
-            "Date": date.today().strftime("%m/%d/%Y")
-        }
+        name = request.form.get("name")
+        amount = request.form.get("amount")
+        category = request.form.get("category")
+        today = date.today().strftime("%m/%d/%Y")
 
-        df = pd.concat([df, pd.DataFrame([new_transaction])], ignore_index=True)
+        # Pick the right transaction class
+        if category == "Food":
+            subcategory = request.form.get("extra1", "")
+            location = request.form.get("extra2", "")
+            tx = FoodTransaction(name, amount, today, category, subcategory, location)
+        elif category == "Travel":
+            destination = request.form.get("extra1", "")
+            transport_mode = request.form.get("extra2", "")
+            tx = TravelTransaction(name, amount, today, category, destination, transport_mode)
+        elif category == "Transportation":
+            transport_type = request.form.get("extra1", "")
+            location = request.form.get("extra2", "")
+            tx = TransportationTransaction(name, amount, today, category, transport_type, location)
+        elif category == "Bills & Utilities":
+            bill_type = request.form.get("extra1", "")
+            provider = request.form.get("extra2", "")
+            tx = BillsUtilitiesTransaction(name, amount, today, category, bill_type, provider)
+        elif category == "Academic":
+            academic_type = request.form.get("extra1", "")
+            institution = request.form.get("extra2", "")
+            tx = AcademicTransaction(name, amount, today, category, academic_type, institution)
+        elif category == "Health":
+            health_type = request.form.get("extra1", "")
+            provider = request.form.get("extra2", "")
+            tx = HealthTransaction(name, amount, today, category, health_type, provider)
+        else:
+            tx = Transaction(name, amount, today, category)
+
+        # Append to DataFrame
+        df = pd.concat([df, pd.DataFrame([tx.get_info()])], ignore_index=True)
         df.to_csv(CSV_FILE, index=False)
 
         flash("Transaction added successfully!")
         return redirect('/transactions')
 
     return render_template("add.html")
+
 
 
 # Modify Transaction
