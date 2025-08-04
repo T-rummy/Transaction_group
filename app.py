@@ -24,18 +24,20 @@ def index():
 
 
 # Transactions Page
+import pandas as pd
+
 @app.route('/transactions')
 def transactions():
-    df = pd.read_csv(CSV_FILE)
+    # Read the CSV file
+    try:
+        df = pd.read_csv('file.csv')
+        transactions_list = df.to_dict(orient='records')  # Convert to list of dicts
+    except FileNotFoundError:
+        transactions_list = []  # If CSV doesn't exist yet
 
-    # Ensure Amount is numeric
-    if "Amount" in df.columns:
-        df["Amount"] = (
-            df["Amount"].replace('[\$,]', '', regex=True)
-            .apply(pd.to_numeric, errors="coerce")
-        )
+    return render_template('transactions.html', transactions=transactions_list)
 
-    return render_template("transactions.html", transactions=df.to_dict(orient="records"))
+
 
 
 # Add Transaction
@@ -87,15 +89,24 @@ def modify():
 
     return render_template("modify.html", transactions=df.to_dict(orient='records'))
 
+import pandas as pd
 
-# Delete Transaction
 @app.route('/delete/<int:transaction_id>', methods=['POST'])
 def delete_transaction(transaction_id):
-    df = pd.read_csv(CSV_FILE)
-    df = df[df["Id"] != transaction_id]
-    df.to_csv(CSV_FILE, index=False)
-    flash("Transaction deleted successfully!")
+    # Read transactions from CSV
+    transactions = pd.read_csv('file.csv')
+
+    # Filter out the transaction with the matching ID
+    transactions = transactions[transactions['Id'] != transaction_id]
+
+    # Save the updated list back to CSV
+    transactions.to_csv('file.csv', index=False)
+
     return redirect('/transactions')
+
+
+
+
 
 
 @app.route('/stats')

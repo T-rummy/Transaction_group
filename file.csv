@@ -1,6 +1,1 @@
 import pandas as pd,Id,Name,Amount,Category,Extra1,Extra2,Date
-" ""Date""])",,,,,,,
-,,,,,,,
-,3.0,guy,100.0,transportation,,,08/03/2025
-,4.0,Tanner,100.0,food,,,08/03/2025
-,5.0,Tanner,20.00,bills,,,08/03/2025

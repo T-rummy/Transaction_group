@@ -1,42 +1,20 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
-h2 {
-    font-weight: 600;
-}
-
+/* Card override for consistent padding */
 .card {
     border-radius: 10px;
+    margin: 10px;
+    padding: 15px;
 }
 
-.navbar-brand {
-    font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-.table {
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.table th {
-    background: #343a40;
-    color: white;
-    text-align: center;
-}
-
-.table td {
-    text-align: center;
-    vertical-align: middle;
-}
-
-.btn {
-    min-width: 90px;
-}
-
-.form-control, .form-select {
-    border-radius: 6px;
+/* Mobile tweaks for custom overrides */
+@media (max-width: 768px) {
+    .card {
+        margin: 5px;
+        padding: 10px;
+    }
 }
