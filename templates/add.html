@@ -1,42 +1,34 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">Add Transaction</h2>
-    <form action="/add" method="POST" class="card shadow p-4">
-        <div class="mb-3">
-            <label for="name" class="form-label">Transaction Name</label>
-            <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Starbucks coffee" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="amount" class="form-label">Amount ($)</label>
-            <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="category" class="form-label">Category</label>
-            <select class="form-select" id="category" name="category" required>
-                <option value="food">Food</option>
-                <option value="travel">Travel</option>
-                <option value="transportation">Transportation</option>
-                <option value="bills">Bills</option>
-                <option value="academic">Academic</option>
-                <option value="health">Health</option>
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="extra1" class="form-label">Extra Field 1 (Optional)</label>
-            <input type="text" class="form-control" id="extra1" name="extra1" placeholder="e.g. Subcategory">
-        </div>
-
-        <div class="mb-3">
-            <label for="extra2" class="form-label">Extra Field 2 (Optional)</label>
-            <input type="text" class="form-control" id="extra2" name="extra2" placeholder="e.g. Location or Provider">
-        </div>
-
-        <button type="submit" class="btn btn-primary">Add Transaction</button>
-    </form>
-</div>
+<h2 class="mb-4">Add Transaction</h2>
+<form method="POST" class="card p-4 shadow">
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" name="name" required>
+    </div>
+    <div class="mb-3">
+        <label for="amount" class="form-label">Amount</label>
+        <input type="number" step="0.01" class="form-control" name="amount" required>
+    </div>
+    <div class="mb-3">
+        <label for="category" class="form-label">Category</label>
+        <select class="form-select" name="category" required>
+            <option value="food">Food</option>
+            <option value="travel">Travel</option>
+            <option value="transportation">Transportation</option>
+            <option value="bills">Bills</option>
+            <option value="academic">Academic</option>
+            <option value="health">Health</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="extra1" class="form-label">Extra 1</label>
+        <input type="text" class="form-control" name="extra1">
+    </div>
+    <div class="mb-3">
+        <label for="extra2" class="form-label">Extra 2</label>
+        <input type="text" class="form-control" name="extra2">
+    </div>
+    <button class="btn btn-primary">Add Transaction</button>
+</form>
 {% endblock %}

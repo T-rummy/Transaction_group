@@ -1,10 +1,6 @@
-Id,Name,Amount,Date,Category,Subcategory,Location,Extra1,Extra2
-5215,austin,45.00,08/03/2025,food,groceries,heb,,
-9512,Tanner Ruminer,10000.0,08/03/2025,food,,,,
-9747,Tanner,5000.0,08/03/2025,transportation,,Dallas TX,,
-1560,alex,150.0,08/03/2025,food,,,,
-9750,Tanner,20.0,08/03/2025,food,,Dallas TX,,
-aziz,89,academic,,,08/03/2025,,,
-aziz,20.00,transportation,,,08/03/2025,,,
-8,aziz,20.00,08/03/2025,bills,,,,
-9,alex,10000000,08/03/2025,health,,,,
+import pandas as pd,Id,Name,Amount,Category,Extra1,Extra2,Date
+" ""Date""])",,,,,,,
+,,,,,,,
+,3.0,guy,100.0,transportation,,,08/03/2025
+,4.0,Tanner,100.0,food,,,08/03/2025
+,5.0,Tanner,20.00,bills,,,08/03/2025
