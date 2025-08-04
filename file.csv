@@ -1,3 +1,1 @@
-import pandas as pd,Id,Name,Amount,Category,Extra1,Extra2,Date
-,5333,Yeheh,62636.0,bills,,,08/03/2025
-,7264,Hshevrv,63727.0,transportation,,,08/03/2025
+import pandas as pd,Id,Name,Amount,Category,Extra1,Extra2,Date,amount

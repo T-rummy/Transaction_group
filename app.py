@@ -113,9 +113,10 @@ def modify():
 
     if request.method == 'POST':
         try:
-            transaction_id = int(request.form['id'])
-            column = request.form['column']
-            new_value = request.form['value']
+            transaction_id = int(request.form['transaction_id'])
+            column = request.form['field']
+            new_value = request.form['new_value']
+
 
             if column == "Amount":
                 new_value = float(new_value)
