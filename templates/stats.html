@@ -48,13 +48,22 @@
     const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
     new Chart(monthlyCtx, {
         type: 'line',
+         animations: {
+      tension: {
+        duration: 1000,
+        easing: 'linear',
+        from: 1,
+        to: 0,
+        loop: true
+      }},
         data: {
             labels: {{ months|safe }},
             datasets: [{
                 label: 'Spending',
                 data: {{ monthly_data|safe }},
-                borderColor: '#3b82f6',
-                fill: false
+                borderColor: '#F54927',
+                fill: false,
+                
             }]
         }
     });

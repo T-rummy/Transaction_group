@@ -1,0 +1,1 @@
+{"Food": {"limit": 300, "alert_threshold": 80}, "Travel": {"limit": 150, "alert_threshold": 90}}
