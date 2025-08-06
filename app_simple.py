@@ -582,6 +582,11 @@ def stats():
                                  category_values=[],
                                  monthly_labels=[],
                                  monthly_values=[],
+                                 timeline_labels=[],
+                                 timeline_values=[],
+                                 budget_labels=[],
+                                 budget_values=[],
+                                 budget_colors=[],
                                  category_stats=[],
                                  recent_transactions=[])
         
@@ -655,6 +660,38 @@ def stats():
         # Unique categories
         unique_categories = len(category_stats)
         
+        # Timeline data (last 30 days)
+        timeline_data = {}
+        for tx in transactions:
+            date_str = tx.get('Date', '')
+            if '/' in date_str:
+                try:
+                    amount = float(tx.get('Amount', 0))
+                    timeline_data[date_str] = timeline_data.get(date_str, 0) + amount
+                except ValueError:
+                    pass
+        
+        # Get last 30 days
+        sorted_dates = sorted(timeline_data.keys())
+        recent_dates = sorted_dates[-30:] if len(sorted_dates) > 30 else sorted_dates
+        timeline_labels = [f"{date.split('/')[1]}/{date.split('/')[0]}" for date in recent_dates]
+        timeline_values = [timeline_data.get(date, 0) for date in recent_dates]
+        
+        # Budget progress data
+        limits_data = read_csv_data(LIMITS_FILE)
+        budget_labels = []
+        budget_values = []
+        budget_colors = ['#3bac72', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57']
+        
+        for i, limit in enumerate(limits_data):
+            category = limit.get('Category')
+            limit_amount = float(limit.get('Limit', 0))
+            current_spending = get_monthly_spending(category)
+            
+            budget_labels.append(category)
+            budget_values.append(min(current_spending, limit_amount))  # Don't exceed limit in chart
+            budget_colors.append(budget_colors[i % len(budget_colors)])
+        
         return render_template("stats.html",
                              total_spending=total_spending,
                              transaction_count=transaction_count,
@@ -664,6 +701,11 @@ def stats():
                              category_values=category_values,
                              monthly_labels=monthly_labels,
                              monthly_values=monthly_values,
+                             timeline_labels=timeline_labels,
+                             timeline_values=timeline_values,
+                             budget_labels=budget_labels,
+                             budget_values=budget_values,
+                             budget_colors=budget_colors,
                              category_stats=category_stats,
                              recent_transactions=recent_transactions)
                              
