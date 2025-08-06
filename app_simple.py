@@ -818,13 +818,8 @@ def stats():
                                  unique_categories=0,
                                  category_labels=[],
                                  category_values=[],
-                                 monthly_labels=[],
-                                 monthly_values=[],
-                                 timeline_labels=[],
-                                 timeline_values=[],
-                                 budget_labels=[],
-                                 budget_values=[],
-                                 budget_colors=[],
+                                 daily_labels=['1/1', '1/2', '1/3', '1/4', '1/5'],
+                                 daily_values=[25.50, 45.20, 12.80, 67.90, 33.40],
                                  category_stats=[],
                                  recent_transactions=[])
         
