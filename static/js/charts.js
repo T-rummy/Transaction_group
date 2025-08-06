@@ -83,7 +83,8 @@ class BudgetCharts {
             return;
         }
         
-        this.charts.timeline = new Chart(ctx, {
+        try {
+            this.charts.timeline = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: data.labels || [],
@@ -131,6 +132,9 @@ class BudgetCharts {
                 }
             }
         });
+        } catch (error) {
+            console.error('Error creating timeline chart:', error);
+        }
     }
 
     // Monthly Comparison Chart
@@ -199,7 +203,8 @@ class BudgetCharts {
             return;
         }
         
-        this.charts.budget = new Chart(ctx, {
+        try {
+            this.charts.budget = new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: data.labels || [],
@@ -231,6 +236,9 @@ class BudgetCharts {
                 }
             }
         });
+        } catch (error) {
+            console.error('Error creating budget chart:', error);
+        }
     }
 
     // Update chart data
@@ -252,6 +260,15 @@ class BudgetCharts {
 // Initialize charts when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Initializing BudgetCharts...');
+    
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded!');
+        return;
+    }
+    
+    console.log('Chart.js is loaded, version:', Chart.version);
+    
     const budgetCharts = new BudgetCharts();
     budgetCharts.initCharts();
     
