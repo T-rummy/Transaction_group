@@ -18,7 +18,7 @@ git push origin main
    - **Name**: `budget-buddy` (or your preferred name)
    - **Environment**: `Python 3`
    - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn app:app`
+   - **Start Command**: `gunicorn app_deploy:app`
    - **Plan**: Free
 
 5. **Click "Create Web Service"**
@@ -30,59 +30,55 @@ git push origin main
 ## Alternative: Deploy to Railway
 
 1. **Go to [railway.app](https://railway.app)**
-2. **Connect GitHub repository**
-3. **Railway will auto-detect Python and deploy**
+2. **Sign up and create a new project**
+3. **Connect your GitHub repository**
+4. **Set the start command**: `gunicorn app_deploy:app`
+5. **Deploy automatically**
 
-## Alternative: Deploy to Heroku
+## What's Different in Deployment Version?
 
-1. **Install Heroku CLI**
-2. **Run these commands:**
-```bash
-heroku create your-app-name
-git push heroku main
-heroku open
-```
+The deployed version (`app_deploy.py`) includes:
+- ✅ **All core functionality**: Transaction tracking, limits, alerts, analytics
+- ✅ **Modern UI**: All the styling and design improvements
+- ✅ **Spending alerts**: Website notifications when limits are reached
+- ❌ **Receipt scanning**: Not available in deployment (heavy dependencies)
+- ❌ **OCR features**: Removed for faster deployment
 
-## Environment Variables (Optional)
+## Local Development vs Deployment
 
-For production, you might want to set:
-- `SECRET_KEY`: A secure random string
-- `DEBUG`: Set to `False`
+### Local Development (Full Features)
+- Use `python app.py` to run locally
+- Includes receipt scanning with OCR
+- All features available
 
-## File Structure for Deployment
-
-```
-├── app.py                 # Main Flask application
-├── requirements.txt       # Python dependencies
-├── Procfile              # Tells hosting platform how to run app
-├── runtime.txt           # Python version
-├── static/               # CSS, images, etc.
-├── templates/            # HTML templates
-├── file.csv              # Transaction data
-├── limits.csv            # Spending limits
-└── README.md             # Project documentation
-```
+### Deployment (Core Features)
+- Uses `app_deploy.py` for hosting
+- No receipt scanning (redirects to manual entry)
+- Faster deployment and startup
+- All other features work perfectly
 
 ## Troubleshooting
 
-### Common Issues:
-1. **Port issues**: The app now uses `PORT` environment variable
-2. **Missing dependencies**: Check `requirements.txt` is complete
-3. **File permissions**: Make sure CSV files are writable
+### Build Fails
+- Make sure you're using `app_deploy.py` in the Procfile
+- Check that `requirements.txt` has the lighter dependencies
+- Ensure Python 3.12 is specified in `runtime.txt`
 
-### Debug Mode:
-- Set `debug=True` in `app.py` for local development
-- Set `debug=False` for production deployment
+### App Won't Start
+- Check the logs in your hosting platform
+- Make sure the start command is `gunicorn app_deploy:app`
+- Verify all files are committed to GitHub
 
-## Next Steps After Deployment
+### Receipt Scanning Not Working
+- This is expected in deployment
+- Users will be redirected to manual entry
+- All other features work normally
 
-1. **Test all features** on the live site
-2. **Set up a custom domain** (optional)
-3. **Configure automatic backups** of your CSV files
-4. **Monitor performance** and scale if needed
+## Next Steps
 
-## Security Notes
+1. **Deploy successfully** using the steps above
+2. **Test all features** except receipt scanning
+3. **Share your app URL** with others
+4. **Consider upgrading** to paid hosting for more features
 
-- The app uses a simple secret key - consider using environment variables for production
-- CSV files are stored locally - consider using a database for production
-- Receipt images are stored locally - consider cloud storage for production 
+Your app will be live and fully functional for expense tracking, limits, and analytics! 🎉 
