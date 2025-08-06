@@ -338,6 +338,72 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--border-secondary);
         }
+
+        /* Secret dev button styles */
+        .secret-dev-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(59, 172, 114, 0.1);
+            border: 2px solid rgba(59, 172, 114, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .secret-dev-button:hover {
+            background: rgba(59, 172, 114, 0.2);
+            border-color: rgba(59, 172, 114, 0.5);
+            transform: scale(1.1);
+        }
+
+        .secret-dev-button.show {
+            display: flex;
+        }
     </style>
+
+    <!-- Secret Dev Button -->
+    <div id="secret-dev-button" class="secret-dev-button" onclick="window.location.href='/dev/test_achievements'">
+        🔧
+    </div>
+
+    <script>
+        // Secret dev button functionality
+        let clickCount = 0;
+        let clickTimer = null;
+        const secretButton = document.getElementById('secret-dev-button');
+
+        function handleSecretClick() {
+            clickCount++;
+            
+            if (clickTimer) {
+                clearTimeout(clickTimer);
+            }
+            
+            clickTimer = setTimeout(() => {
+                if (clickCount >= 3) {
+                    secretButton.classList.add('show');
+                    // Hide after 10 seconds
+                    setTimeout(() => {
+                        secretButton.classList.remove('show');
+                        clickCount = 0;
+                    }, 10000);
+                } else {
+                    clickCount = 0;
+                }
+            }, 1000); // Reset after 1 second
+        }
+
+        // Listen for clicks anywhere on the page
+        document.addEventListener('click', handleSecretClick);
+    </script>
 </body>
 </html>
