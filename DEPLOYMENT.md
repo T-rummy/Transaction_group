@@ -17,7 +17,7 @@ git push origin main
 4. **Configure the service:**
    - **Name**: `budget-buddy` (or your preferred name)
    - **Environment**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
+   - **Build Command**: `pip install --upgrade pip && pip install setuptools==68.2.2 && pip install -r requirements.txt`
    - **Start Command**: `gunicorn app_deploy:app`
    - **Plan**: Free
 
@@ -62,7 +62,8 @@ The deployed version (`app_deploy.py`) includes:
 ### Build Fails
 - Make sure you're using `app_deploy.py` in the Procfile
 - Check that `requirements.txt` has the lighter dependencies
-- Ensure Python 3.12 is specified in `runtime.txt`
+- Ensure Python 3.11 is specified in `runtime.txt`
+- The build command now includes setuptools installation
 
 ### App Won't Start
 - Check the logs in your hosting platform
