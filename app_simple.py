@@ -609,13 +609,33 @@ def reset_achievements():
 def add_test_transaction():
     """Developer route to add a test transaction (hidden from users)."""
     try:
-        # Add a test transaction
+        import random
+        from datetime import timedelta
+        
+        # Randomize test data
+        categories = ['Food', 'Travel', 'Academic', 'Health', 'Bills & Utilities', 'Entertainment', 'Shopping', 'Transportation']
+        names = ['Coffee Shop', 'Gas Station', 'Grocery Store', 'Restaurant', 'Online Purchase', 'Movie Theater', 'Gym Membership', 'Book Store']
+        
+        # Random date within last 30 days
+        random_days = random.randint(0, 30)
+        random_date = date.today() - timedelta(days=random_days)
+        
+        # Random amount between $5 and $200
+        random_amount = round(random.uniform(5.0, 200.0), 2)
+        
+        # Random category and name
+        random_category = random.choice(categories)
+        random_name = random.choice(names)
+        
+        # Generate random ID (9000-9999 range)
+        random_id = str(random.randint(9000, 9999))
+        
         test_transaction = {
-            'Id': '9999',
-            'Name': 'Test Transaction',
-            'Amount': '15.00',
-            'Date': date.today().strftime("%m/%d/%Y"),
-            'Category': 'Food'
+            'Id': random_id,
+            'Name': random_name,
+            'Amount': f'{random_amount:.2f}',
+            'Date': random_date.strftime("%m/%d/%Y"),
+            'Category': random_category
         }
         
         # Read existing transactions
@@ -651,48 +671,40 @@ def add_test_transaction():
 def add_multiple_test_transactions():
     """Developer route to add multiple test transactions for achievement testing."""
     try:
+        import random
+        from datetime import timedelta
+        
         # Read existing transactions
         transactions = read_csv_data(CSV_FILE)
         current_count = len(transactions)
         
         # Add multiple test transactions with different categories
-        test_transactions = [
-            {
-                'Id': '9991',
-                'Name': 'Test Food Transaction',
-                'Amount': '25.00',
-                'Date': date.today().strftime("%m/%d/%Y"),
-                'Category': 'Food'
-            },
-            {
-                'Id': '9981',
-                'Name': 'Test Travel Transaction',
-                'Amount': '50.00',
-                'Date': date.today().strftime("%m/%d/%Y"),
-                'Category': 'Travel'
-            },
-            {
-                'Id': '9971',
-                'Name': 'Test Academic Transaction',
-                'Amount': '30.00',
-                'Date': date.today().strftime("%m/%d/%Y"),
-                'Category': 'Academic'
-            },
-            {
-                'Id': '9961',
-                'Name': 'Test Health Transaction',
-                'Amount': '40.00',
-                'Date': date.today().strftime("%m/%d/%Y"),
-                'Category': 'Health'
-            },
-            {
-                'Id': '9951',
-                'Name': 'Test Bills Transaction',
-                'Amount': '100.00',
-                'Date': date.today().strftime("%m/%d/%Y"),
-                'Category': 'Bills & Utilities'
-            }
-        ]
+        test_transactions = []
+        categories = ['Food', 'Travel', 'Academic', 'Health', 'Bills & Utilities', 'Entertainment', 'Shopping', 'Transportation']
+        names = ['Coffee Shop', 'Gas Station', 'Grocery Store', 'Restaurant', 'Online Purchase', 'Movie Theater', 'Gym Membership', 'Book Store', 'Amazon', 'Target', 'Walmart', 'Starbucks', 'McDonald\'s', 'Subway', 'Pizza Place']
+        
+        for i in range(5):
+            # Random date within last 30 days
+            random_days = random.randint(0, 30)
+            random_date = date.today() - timedelta(days=random_days)
+            
+            # Random amount between $10 and $300
+            random_amount = round(random.uniform(10.0, 300.0), 2)
+            
+            # Random category and name
+            random_category = random.choice(categories)
+            random_name = random.choice(names)
+            
+            # Generate random ID (9000-9999 range)
+            random_id = str(random.randint(9000, 9999))
+            
+            test_transactions.append({
+                'Id': random_id,
+                'Name': random_name,
+                'Amount': f'{random_amount:.2f}',
+                'Date': random_date.strftime("%m/%d/%Y"),
+                'Category': random_category
+            })
         
         # Add all test transactions
         for tx in test_transactions:
@@ -731,9 +743,9 @@ def clear_test_transactions():
         # Read existing transactions
         transactions = read_csv_data(CSV_FILE)
         
-        # Filter out test transactions (IDs starting with 99)
+        # Filter out test transactions (IDs in 9000-9999 range)
         original_count = len(transactions)
-        transactions = [tx for tx in transactions if not str(tx.get('Id', '')).startswith('99')]
+        transactions = [tx for tx in transactions if not (str(tx.get('Id', '')).isdigit() and 9000 <= int(tx.get('Id', 0)) <= 9999)]
         removed_count = original_count - len(transactions)
         
         # Write back to CSV
