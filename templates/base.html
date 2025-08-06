@@ -80,23 +80,25 @@
                 const shape = this.shapes[Math.floor(Math.random() * this.shapes.length)];
                 const size = Math.random() * 20 + 15;
                 const startX = Math.random() * window.innerWidth;
-                const startY = -50;
-                const endX = startX + (Math.random() - 0.5) * 400;
-                const endY = window.innerHeight + 100;
+                const startY = -100; // Start higher above screen
+                const endX = startX + (Math.random() - 0.5) * 600; // More spread
+                const endY = window.innerHeight + 200; // End further below
                 const rotation = Math.random() * 720;
-                const duration = Math.random() * 3 + 2;
-                const delay = Math.random() * 0.5;
+                const duration = Math.random() * 4 + 3; // Longer duration
+                const delay = Math.random() * 1.5; // More staggered timing
 
-                // Set styles
+                // Set styles with better shower effect
                 particle.style.cssText = `
-                    position: absolute;
+                    position: fixed;
                     left: ${startX}px;
                     top: ${startY}px;
                     font-size: ${size}px;
                     color: ${color};
                     transform: rotate(0deg);
-                    animation: confetti3d-fall ${duration}s ${delay}s linear forwards;
+                    animation: confetti3d-shower ${duration}s ${delay}s linear forwards;
                     z-index: ${Math.floor(Math.random() * 1000)};
+                    pointer-events: none;
+                    user-select: none;
                 `;
                 particle.textContent = shape;
 
@@ -179,15 +181,52 @@
         fetchAlerts();
         setInterval(fetchAlerts, 30000);
 
-        // Check for achievement flash messages and trigger confetti
+        // Achievement detection and confetti triggering
         document.addEventListener('DOMContentLoaded', function() {
+            // Check for achievement flash messages
             const flashMessages = document.querySelectorAll('.alert');
             flashMessages.forEach(message => {
-                if (message.textContent.includes('achievements unlocked')) {
+                const text = message.textContent.toLowerCase();
+                if (text.includes('achievements unlocked') || text.includes('new achievements')) {
+                    console.log('Achievement detected! Triggering confetti...');
                     setTimeout(() => {
                         trigger3DConfetti(100);
-                    }, 500);
+                    }, 800);
                 }
+            });
+
+            // Also check for achievement page specifically
+            if (window.location.pathname === '/achievements') {
+                const unlockedCards = document.querySelectorAll('.achievement-card.unlocked');
+                if (unlockedCards.length > 0) {
+                    console.log('Achievement page with unlocked achievements detected!');
+                    setTimeout(() => {
+                        trigger3DConfetti(75);
+                    }, 1000);
+                }
+            }
+
+            // Listen for new flash messages (for dynamic content)
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1 && node.classList && node.classList.contains('alert')) {
+                            const text = node.textContent.toLowerCase();
+                            if (text.includes('achievements unlocked') || text.includes('new achievements')) {
+                                console.log('New achievement flash detected! Triggering confetti...');
+                                setTimeout(() => {
+                                    trigger3DConfetti(100);
+                                }, 500);
+                            }
+                        }
+                    });
+                });
+            });
+
+            // Start observing
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
             });
         });
 
