@@ -908,3 +908,40 @@ body {
 .theme-transition * {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
+
+/* 3D Confetti Animations */
+@keyframes confetti3d-fall {
+    0% {
+        transform: translateY(-100px) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    25% {
+        transform: translateY(25vh) rotate(180deg) scale(1.1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(50vh) rotate(360deg) scale(0.9);
+        opacity: 1;
+    }
+    75% {
+        transform: translateY(75vh) rotate(540deg) scale(1.05);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg) scale(0.8);
+        opacity: 0;
+    }
+}
+
+.confetti-3d-particle {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform;
+}
+
+/* Enhanced confetti with 3D perspective */
+#confetti-3d-container {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}

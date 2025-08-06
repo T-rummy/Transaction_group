@@ -57,8 +57,79 @@
         </div>
     </footer>
 
+    <!-- 3D Confetti Container -->
+    <div id="confetti-3d-container" class="fixed inset-0 pointer-events-none z-50"></div>
+
     <!-- JavaScript -->
     <script>
+        // 3D Confetti System
+        class Confetti3D {
+            constructor() {
+                this.container = document.getElementById('confetti-3d-container');
+                this.particles = [];
+                this.colors = ['#3bac72', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+                this.shapes = ['🎉', '🎊', '🏆', '⭐', '💎', '🌟', '✨', '🎯'];
+            }
+
+            createParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'confetti-3d-particle';
+                
+                // Random properties
+                const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                const shape = this.shapes[Math.floor(Math.random() * this.shapes.length)];
+                const size = Math.random() * 20 + 15;
+                const startX = Math.random() * window.innerWidth;
+                const startY = -50;
+                const endX = startX + (Math.random() - 0.5) * 400;
+                const endY = window.innerHeight + 100;
+                const rotation = Math.random() * 720;
+                const duration = Math.random() * 3 + 2;
+                const delay = Math.random() * 0.5;
+
+                // Set styles
+                particle.style.cssText = `
+                    position: absolute;
+                    left: ${startX}px;
+                    top: ${startY}px;
+                    font-size: ${size}px;
+                    color: ${color};
+                    transform: rotate(0deg);
+                    animation: confetti3d-fall ${duration}s ${delay}s linear forwards;
+                    z-index: ${Math.floor(Math.random() * 1000)};
+                `;
+                particle.textContent = shape;
+
+                return particle;
+            }
+
+            create3DConfetti(count = 50) {
+                // Clear existing confetti
+                this.container.innerHTML = '';
+                
+                // Create new particles
+                for (let i = 0; i < count; i++) {
+                    const particle = this.createParticle();
+                    this.container.appendChild(particle);
+                    
+                    // Remove particle after animation
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.remove();
+                        }
+                    }, 5000);
+                }
+            }
+        }
+
+        // Initialize 3D confetti
+        const confetti3D = new Confetti3D();
+
+        // Global function to trigger 3D confetti
+        function trigger3DConfetti(count = 50) {
+            confetti3D.create3DConfetti(count);
+        }
+
         // Mobile Menu Toggle
         function toggleMobileMenu() {
             const menu = document.querySelector('.nav-menu');
@@ -107,6 +178,18 @@
         // Initialize alerts and refresh every 30 seconds
         fetchAlerts();
         setInterval(fetchAlerts, 30000);
+
+        // Check for achievement flash messages and trigger confetti
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.alert');
+            flashMessages.forEach(message => {
+                if (message.textContent.includes('achievements unlocked')) {
+                    setTimeout(() => {
+                        trigger3DConfetti(100);
+                    }, 500);
+                }
+            });
+        });
 
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {

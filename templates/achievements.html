@@ -133,35 +133,14 @@
 </style>
 
 <script>
-// Confetti animation function
-function createConfetti() {
-    const container = document.getElementById('confetti-container');
-    const colors = ['#3bac72', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
-    
-    for (let i = 0; i < 50; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.animationDelay = Math.random() * 2 + 's';
-        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
-        container.appendChild(confetti);
-        
-        // Remove confetti after animation
-        setTimeout(() => {
-            confetti.remove();
-        }, 5000);
-    }
-}
-
-// Check for new achievements and trigger confetti
+// Check for new achievements and trigger 3D confetti
 document.addEventListener('DOMContentLoaded', function() {
     // Check if there are any newly unlocked achievements
     const unlockedCards = document.querySelectorAll('.achievement-card.unlocked');
     if (unlockedCards.length > 0) {
         // Small delay to ensure page is loaded
         setTimeout(() => {
-            createConfetti();
+            trigger3DConfetti(75); // More confetti for achievements!
         }, 1000);
     }
 });

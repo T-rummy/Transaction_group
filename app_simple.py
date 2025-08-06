@@ -658,36 +658,36 @@ def add_multiple_test_transactions():
         # Add multiple test transactions with different categories
         test_transactions = [
             {
-                'Id': f'999{i}',
-                'Name': f'Test Transaction {i+1}',
+                'Id': '9991',
+                'Name': 'Test Food Transaction',
                 'Amount': '25.00',
                 'Date': date.today().strftime("%m/%d/%Y"),
                 'Category': 'Food'
             },
             {
-                'Id': f'998{i}',
-                'Name': f'Test Travel {i+1}',
+                'Id': '9981',
+                'Name': 'Test Travel Transaction',
                 'Amount': '50.00',
                 'Date': date.today().strftime("%m/%d/%Y"),
                 'Category': 'Travel'
             },
             {
-                'Id': f'997{i}',
-                'Name': f'Test Academic {i+1}',
+                'Id': '9971',
+                'Name': 'Test Academic Transaction',
                 'Amount': '30.00',
                 'Date': date.today().strftime("%m/%d/%Y"),
                 'Category': 'Academic'
             },
             {
-                'Id': f'996{i}',
-                'Name': f'Test Health {i+1}',
+                'Id': '9961',
+                'Name': 'Test Health Transaction',
                 'Amount': '40.00',
                 'Date': date.today().strftime("%m/%d/%Y"),
                 'Category': 'Health'
             },
             {
-                'Id': f'995{i}',
-                'Name': f'Test Bills {i+1}',
+                'Id': '9951',
+                'Name': 'Test Bills Transaction',
                 'Amount': '100.00',
                 'Date': date.today().strftime("%m/%d/%Y"),
                 'Category': 'Bills & Utilities'
