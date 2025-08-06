@@ -114,9 +114,8 @@ def create_spending_alert(category, current_spending, limit, threshold_percentag
         else:
             alerts = []
         
-        # Create a unique key based on spending level
-        spending_level = int(current_spending / (limit * threshold_percentage / 100))
-        alert_key = f"{category}_{threshold_percentage}_{spending_level}"
+        # Create a unique key based on category and threshold
+        alert_key = f"{category}_{threshold_percentage}_{int(date.today().strftime('%Y%m%d'))}"
         
         if not any(alert.get('key') == alert_key for alert in alerts):
             alert_data['key'] = alert_key
@@ -492,11 +491,28 @@ def dismiss_alert(alert_key):
             
             with open(alert_file, 'w') as f:
                 json.dump(alerts, f)
+            
+            print(f"Alert dismissed: {alert_key}")
         
         return redirect(request.referrer or url_for('index'))
     except Exception as e:
+        print(f"Error dismissing alert: {e}")
         flash(f"Error dismissing alert: {str(e)}")
         return redirect(request.referrer or url_for('index'))
+
+@app.route('/clear_all_alerts')
+def clear_all_alerts():
+    """Clear all spending alerts (for testing)."""
+    try:
+        alert_file = "active_alerts.json"
+        if os.path.exists(alert_file):
+            with open(alert_file, 'w') as f:
+                json.dump([], f)
+            flash("All alerts cleared!")
+        return redirect(url_for('index'))
+    except Exception as e:
+        flash(f"Error clearing alerts: {str(e)}")
+        return redirect(url_for('index'))
 
 @app.route('/scan_receipt', methods=['GET', 'POST'])
 def scan_receipt():
