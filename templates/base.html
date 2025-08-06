@@ -81,12 +81,12 @@
                 const size = Math.random() * 20 + 15;
                 const startX = Math.random() * window.innerWidth;
                 // Vary the starting height for more natural shower effect
-                const startY = -200 - (Math.random() * 100); // Start between -200 and -300px
+                const startY = -500 - (Math.random() * 200); // Start between -500 and -700px
                 const endX = startX + (Math.random() - 0.5) * 800; // More spread
                 const endY = window.innerHeight + 300; // End further below
                 const rotation = Math.random() * 720;
-                const duration = Math.random() * 4 + 3; // Longer duration
-                const delay = Math.random() * 2; // More staggered timing
+                const duration = Math.random() * 5 + 4; // Even longer duration
+                const delay = Math.random() * 3; // More staggered timing
 
                 // Set styles with better shower effect
                 particle.style.cssText = `
@@ -125,7 +125,22 @@
                         if (particle.parentNode) {
                             particle.remove();
                         }
-                    }, 8000);
+                    }, 12000);
+                }
+                
+                // Add some extra high-falling particles for dramatic effect
+                for (let i = 0; i < Math.floor(count * 0.3); i++) {
+                    setTimeout(() => {
+                        const extraParticle = this.createParticle();
+                        extraParticle.style.top = '-800px'; // Start even higher
+                        this.container.appendChild(extraParticle);
+                        
+                        setTimeout(() => {
+                            if (extraParticle.parentNode) {
+                                extraParticle.remove();
+                            }
+                        }, 12000);
+                    }, Math.random() * 2000); // Stagger the extra particles
                 }
                 
                 console.log('Confetti creation complete');
