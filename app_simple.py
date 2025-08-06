@@ -961,13 +961,8 @@ def stats():
                              unique_categories=unique_categories,
                              category_labels=category_labels,
                              category_values=category_values,
-                             monthly_labels=monthly_labels,
-                             monthly_values=monthly_values,
-                             timeline_labels=timeline_labels,
-                             timeline_values=timeline_values,
-                             budget_labels=budget_labels,
-                             budget_values=budget_values,
-                             budget_colors=budget_colors,
+                             daily_labels=timeline_labels,
+                             daily_values=timeline_values,
                              category_stats=category_stats,
                              recent_transactions=recent_transactions)
                              
@@ -980,13 +975,8 @@ def stats():
                              unique_categories=0,
                              category_labels=[],
                              category_values=[],
-                             monthly_labels=[],
-                             monthly_values=[],
-                             timeline_labels=['1/1', '1/2', '1/3', '1/4', '1/5'],
-                             timeline_values=[25.50, 45.20, 12.80, 67.90, 33.40],
-                             budget_labels=['Food', 'Travel', 'Shopping'],
-                             budget_values=[450, 300, 200],
-                             budget_colors=['#3bac72', '#ff6b6b', '#4ecdc4'],
+                             daily_labels=['1/1', '1/2', '1/3', '1/4', '1/5'],
+                             daily_values=[25.50, 45.20, 12.80, 67.90, 33.40],
                              category_stats=[],
                              recent_transactions=[])
 
