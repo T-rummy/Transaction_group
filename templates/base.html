@@ -80,12 +80,13 @@
                 const shape = this.shapes[Math.floor(Math.random() * this.shapes.length)];
                 const size = Math.random() * 20 + 15;
                 const startX = Math.random() * window.innerWidth;
-                const startY = -100; // Start higher above screen
-                const endX = startX + (Math.random() - 0.5) * 600; // More spread
-                const endY = window.innerHeight + 200; // End further below
+                // Vary the starting height for more natural shower effect
+                const startY = -200 - (Math.random() * 100); // Start between -200 and -300px
+                const endX = startX + (Math.random() - 0.5) * 800; // More spread
+                const endY = window.innerHeight + 300; // End further below
                 const rotation = Math.random() * 720;
                 const duration = Math.random() * 4 + 3; // Longer duration
-                const delay = Math.random() * 1.5; // More staggered timing
+                const delay = Math.random() * 2; // More staggered timing
 
                 // Set styles with better shower effect
                 particle.style.cssText = `
@@ -99,6 +100,7 @@
                     z-index: ${Math.floor(Math.random() * 1000)};
                     pointer-events: none;
                     user-select: none;
+                    will-change: transform;
                 `;
                 particle.textContent = shape;
 
@@ -112,18 +114,18 @@
                 // Clear existing confetti
                 this.container.innerHTML = '';
                 
-                // Create new particles
+                // Create new particles with varied timing for shower effect
                 for (let i = 0; i < count; i++) {
                     const particle = this.createParticle();
                     this.container.appendChild(particle);
                     console.log('Added particle', i + 1, 'of', count);
                     
-                    // Remove particle after animation
+                    // Remove particle after animation (longer for shower effect)
                     setTimeout(() => {
                         if (particle.parentNode) {
                             particle.remove();
                         }
-                    }, 5000);
+                    }, 8000);
                 }
                 
                 console.log('Confetti creation complete');
