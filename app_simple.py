@@ -48,9 +48,19 @@ def read_csv_data(filename):
     if not os.path.exists(filename):
         return []
     
-    with open(filename, 'r') as f:
-        reader = csv.DictReader(f)
-        return list(reader)
+    try:
+        with open(filename, 'r') as f:
+            reader = csv.DictReader(f)
+            data = list(reader)
+            # Clean up any None values or empty strings
+            for row in data:
+                for key in row:
+                    if row[key] is None:
+                        row[key] = ''
+            return data
+    except Exception as e:
+        print(f"Error reading CSV file {filename}: {e}")
+        return []
 
 def write_csv_data(filename, data, fieldnames):
     """Write data to CSV file."""
@@ -232,6 +242,18 @@ def index():
 def transactions():
     try:
         transactions_list = read_csv_data(CSV_FILE)
+        # Ensure all transactions have required fields
+        for tx in transactions_list:
+            if 'Id' not in tx or not tx['Id']:
+                tx['Id'] = '0'
+            if 'Name' not in tx:
+                tx['Name'] = ''
+            if 'Amount' not in tx:
+                tx['Amount'] = '0'
+            if 'Date' not in tx:
+                tx['Date'] = ''
+            if 'Category' not in tx:
+                tx['Category'] = ''
     except Exception as e:
         print(f"Error reading transactions: {e}")
         transactions_list = []

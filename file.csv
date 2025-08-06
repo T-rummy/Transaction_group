@@ -1,7 +1,7 @@
-import pandas as pd,Id,Name,Amount,Category,Extra1,Extra2,Date,amount,Subcategory,Location,Destination,Transport_Mode,Academic_Type,Institution
-,7695,coffee,50.0,Food,,,08/05/2025,,,,,,,
-,9792,Food,5.21,Food,,,08/05/2025,,,,,,,
-,8376,moving,700.0,Travel,,,08/05/2025,,,,colorado,work,,
-,1780,fun,100.0,Travel,,,08/05/2025,,,,colorado,fun,,
-,7867,HALF Price bookd,7.49,Academic,,,06/30/2025,,,,,,,
-,4374,Addison Cafe,13.0,Food,,,08/05/2025,,,,,,,
+Id,Name,Amount,Date,Category,Subcategory,Location,Destination,Transport_Mode,Transport_Type,Bill_Type,Provider,Academic_Type,Institution,Health_Type
+7695,coffee,50.0,08/05/2025,Food,,,,,,,,,,
+9792,Food,5.21,08/05/2025,Food,,,,,,,,,,
+8376,moving,700.0,08/05/2025,Travel,,,,colorado,work,,,,,
+1780,fun,100.0,08/05/2025,Travel,,,,colorado,fun,,,,,
+7867,HALF Price bookd,7.49,06/30/2025,Academic,,,,,,,,,,
+4374,Addison Cafe,13.0,08/05/2025,Food,,,,,,,,,,
