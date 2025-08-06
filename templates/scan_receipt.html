@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 800px; margin: 0 auto;">
+    <div class="text-center" style="margin-bottom: 32px;">
+        <h1 class="text-3xl font-bold text-primary" style="margin-bottom: 8px;">📷 Scan Receipt</h1>
+        <p class="text-secondary">Take a photo or upload a receipt to automatically add a transaction</p>
+    </div>
+    
+    <div class="card" style="padding: 32px;">
+        <!-- Camera Capture Section -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">📱 Use Camera</h2>
+            <div class="text-center">
+                <div id="camera-container" class="mb-4" style="display: none;">
+                    <video id="camera" autoplay style="width: 100%; max-width: 400px; border-radius: 8px;"></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                </div>
+                <div id="captured-image" class="mb-4" style="display: none;">
+                    <img id="preview" style="width: 100%; max-width: 400px; border-radius: 8px;">
+                </div>
+                <div class="space-x-4">
+                    <button id="start-camera" class="btn btn-primary">
+                        📷 Start Camera
+                    </button>
+                    <button id="capture-photo" class="btn btn-secondary" style="display: none;">
+                        📸 Capture Photo
+                    </button>
+                    <button id="retake-photo" class="btn btn-outline" style="display: none;">
+                        🔄 Retake
+                    </button>
+                    <button id="process-captured" class="btn btn-primary" style="display: none;">
+                        ✅ Process Receipt
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mb-8">
+            <div class="text-secondary">- OR -</div>
+        </div>
+        
+        <!-- File Upload Section -->
+        <div>
+            <h2 class="text-xl font-semibold mb-4">📁 Upload Receipt</h2>
+            <form action="/scan_receipt" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <div class="form-group">
+                    <label class="form-label">Select Receipt Image</label>
+                    <input type="file" name="receipt_image" accept="image/*,.heic,.heif" class="form-input" required>
+                    <p class="text-sm text-secondary mt-2">
+                        Supported formats: JPG, PNG, GIF, HEIC. Make sure the receipt is clearly visible and well-lit.
+                    </p>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-full">
+                    🔍 Process Receipt
+                </button>
+            </form>
+        </div>
+        
+                       <!-- Tips Section -->
+               <div class="mt-8 p-4 bg-blue-50 rounded-lg">
+                   <h3 class="font-semibold mb-2">💡 Tips for Best Results:</h3>
+                   <ul class="text-sm text-secondary space-y-1">
+                       <li>• Ensure good lighting when taking the photo</li>
+                       <li>• Keep the receipt flat and avoid shadows</li>
+                       <li>• Make sure all text is clearly visible</li>
+                       <li>• Avoid blurry or angled shots</li>
+                       <li>• The total amount should be clearly visible</li>
+                       <li>• iPhone HEIC photos are automatically supported</li>
+                       <li>• If OCR fails, you can manually edit the data on the next page</li>
+                       <li>• The app will try multiple approaches to extract text</li>
+                       <li>• You can always manually enter any missing information</li>
+                   </ul>
+               </div>
+    </div>
+</div>
+
+<script>
+let stream = null;
+let capturedImageData = null;
+
+// Camera functionality
+document.getElementById('start-camera').addEventListener('click', async () => {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment', // Use back camera on mobile
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        });
+        
+        const video = document.getElementById('camera');
+        video.srcObject = stream;
+        
+        document.getElementById('camera-container').style.display = 'block';
+        document.getElementById('start-camera').style.display = 'none';
+        document.getElementById('capture-photo').style.display = 'inline-block';
+        
+    } catch (err) {
+        console.error('Error accessing camera:', err);
+        alert('Could not access camera. Please use file upload instead.');
+    }
+});
+
+document.getElementById('capture-photo').addEventListener('click', () => {
+    const video = document.getElementById('camera');
+    const canvas = document.getElementById('canvas');
+    const preview = document.getElementById('preview');
+    
+    // Set canvas size to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Draw video frame to canvas
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    
+    // Get image data
+    capturedImageData = canvas.toDataURL('image/jpeg');
+    preview.src = capturedImageData;
+    
+    // Show preview and hide camera
+    document.getElementById('camera-container').style.display = 'none';
+    document.getElementById('captured-image').style.display = 'block';
+    document.getElementById('capture-photo').style.display = 'none';
+    document.getElementById('retake-photo').style.display = 'inline-block';
+    document.getElementById('process-captured').style.display = 'inline-block';
+    
+    // Stop camera stream
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+});
+
+document.getElementById('retake-photo').addEventListener('click', () => {
+    document.getElementById('captured-image').style.display = 'none';
+    document.getElementById('retake-photo').style.display = 'none';
+    document.getElementById('process-captured').style.display = 'none';
+    document.getElementById('start-camera').style.display = 'inline-block';
+    capturedImageData = null;
+});
+
+document.getElementById('process-captured').addEventListener('click', async () => {
+    if (!capturedImageData) return;
+    
+    try {
+        // Convert base64 to blob
+        const response = await fetch(capturedImageData);
+        const blob = await response.blob();
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('receipt_image', blob, 'receipt.jpg');
+        
+        // Submit to server
+        const result = await fetch('/scan_receipt', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (result.ok) {
+            window.location.href = '/confirm_receipt';
+        } else {
+            const errorText = await result.text();
+            alert('Error processing receipt: ' + errorText);
+        }
+        
+    } catch (err) {
+        console.error('Error processing captured image:', err);
+        alert('Error processing image. Please try again.');
+    }
+});
+
+// File input preview
+document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        // Show file name
+        const fileName = file.name;
+        console.log('Selected file:', fileName);
+    }
+});
+</script>
+{% endblock %} 

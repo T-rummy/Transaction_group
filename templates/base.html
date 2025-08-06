@@ -3,182 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title or "ExpenseTrack" }}</title>
+    <title>{{ title or "Budget Buddy" }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <!-- Spending Alerts -->
+    <div id="spending-alerts" class="spending-alerts">
+        <!-- Alerts will be dynamically inserted here -->
+    </div>
+
     <!-- Modern Navigation -->
     <nav class="navbar">
-        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-            <div class="flex justify-between items-center" style="height: 60px;">
-                <div class="flex items-center">
-                    <a href="{{ url_for('index') }}" class="nav-link" style="font-size: 20px; font-weight: 700; color: var(--primary-color);">
-                        💳 ExpenseTrack
-                    </a>
-                </div>
-                
-                <div class="hidden md:flex" style="gap: 48px;">
-                    <a href="/" class="nav-link {{ 'active' if request.endpoint == 'index' else '' }}">Add</a>
-                    <a href="/transactions" class="nav-link {{ 'active' if request.endpoint == 'transactions' else '' }}">Transactions</a>
-                    <a href="/set_limits" class="nav-link {{ 'active' if request.endpoint == 'set_limit' else '' }}">Limits</a>
-                    <a href="/limits" class="nav-link {{ 'active' if request.endpoint == 'limits' else '' }}">View Limits</a>
-                    <a href="/modify" class="nav-link {{ 'active' if request.endpoint == 'modify' else '' }}">Modify</a>
-                    <a href="/stats" class="nav-link {{ 'active' if request.endpoint == 'stats' else '' }}">Analytics</a>
-                </div>
-                
-                <div class="flex items-center">
-                    <button id="menu-btn" class="md:hidden btn btn-outline" style="padding: 8px 12px;">
-                        ☰
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Mobile Menu -->
-            <div id="mobile-menu" class="hidden md:hidden" style="padding: 16px 0; border-top: 1px solid var(--border-color);">
-                <div class="flex flex-col" style="gap: 12px;">
-                    <a href="/" class="nav-link">Add Transaction</a>
-                    <a href="/transactions" class="nav-link">All Transactions</a>
-                    <a href="/set_limits" class="nav-link">Set Limits</a>
-                    <a href="/limits" class="nav-link">View Limits</a>
-                    <a href="/modify" class="nav-link">Modify</a>
-                    <a href="/stats" class="nav-link">Analytics</a>
-                </div>
-            </div>
+        <div class="container">
+            <!-- Brand -->
+            <a href="{{ url_for('index') }}" class="nav-brand">
+                <img src="{{ url_for('static', filename='images/budget-buddy-logo.png') }}" alt="Budget Buddy">
+            </a>
+
+            <!-- Desktop Navigation -->
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}" class="nav-link {{ 'active' if request.endpoint == 'index' }}">Add Transaction</a></li>
+                <li><a href="{{ url_for('transactions') }}" class="nav-link {{ 'active' if request.endpoint == 'transactions' }}">Transactions</a></li>
+                <li><a href="{{ url_for('stats') }}" class="nav-link {{ 'active' if request.endpoint == 'stats' }}">Analytics</a></li>
+                <li><a href="{{ url_for('limits') }}" class="nav-link {{ 'active' if request.endpoint == 'limits' }}">Limits</a></li>
+                <li><a href="{{ url_for('scan_receipt') }}" class="nav-link {{ 'active' if request.endpoint == 'scan_receipt' }}">Scan Receipt</a></li>
+            </ul>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                Menu
+            </button>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main style="min-height: calc(100vh - 60px); padding: 32px 20px;">
-        <div class="container" style="max-width: 1200px; margin: 0 auto;">
-            <!-- Flash Messages -->
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    <div class="space-y-2">
-                        {% for message in messages %}
-                            <div class="flash-message flash-success fade-in">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% endwith %}
-            
-            <!-- Spending Alerts -->
-            <div id="spending-alerts" class="space-y-3" style="margin-bottom: 24px;">
-                <!-- Alerts will be loaded here -->
-            </div>
-            
-            <!-- Page Content -->
-            {% block content %}{% endblock %}
-        </div>
+    <main class="main-content">
+        {% block content %}{% endblock %}
     </main>
 
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="text-center">
+                <p class="text-secondary">
+                    © 2025 Budget Buddy - Smart Expense Tracking
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
     <script>
-        // Mobile menu toggle
-        document.getElementById('menu-btn').addEventListener('click', () => {
-            const mobileMenu = document.getElementById('mobile-menu');
-            mobileMenu.classList.toggle('hidden');
-        });
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.querySelector('.nav-menu');
+            menu.classList.toggle('active');
+        }
 
-        // Add fade-in animation to all cards
-        document.addEventListener('DOMContentLoaded', () => {
-            const cards = document.querySelectorAll('.card, .transaction-card, .stats-card');
-            cards.forEach((card, index) => {
-                card.style.animationDelay = `${index * 0.1}s`;
-                card.classList.add('fade-in');
-            });
-            
-            // Load spending alerts
-            loadSpendingAlerts();
-        });
-
-        // Load and display spending alerts
-        function loadSpendingAlerts() {
+        // Spending Alerts System
+        function fetchAlerts() {
             fetch('/get_alerts')
                 .then(response => response.json())
                 .then(alerts => {
                     const alertsContainer = document.getElementById('spending-alerts');
-                    alertsContainer.innerHTML = '';
                     
-                    alerts.forEach(alert => {
-                        const alertElement = createAlertElement(alert);
-                        alertsContainer.appendChild(alertElement);
-                    });
+                    if (alerts.length === 0) {
+                        alertsContainer.classList.remove('show');
+                        return;
+                    }
+
+                    alertsContainer.innerHTML = alerts.map(alert => `
+                        <div class="spending-alert">
+                            <div class="alert-content">
+                                <div class="alert-title">Spending Alert: ${alert.category}</div>
+                                <div class="alert-message">
+                                    You've spent $${alert.current_spending} out of $${alert.limit} (${alert.threshold_percentage}% threshold)
+                                </div>
+                            </div>
+                            <button class="alert-dismiss" onclick="dismissAlert('${alert.alert_key}')">
+                                ×
+                            </button>
+                        </div>
+                    `).join('');
+
+                    alertsContainer.classList.add('show');
                 })
-                .catch(error => console.error('Error loading alerts:', error));
+                .catch(error => console.error('Error fetching alerts:', error));
         }
 
-        // Create alert element
-        function createAlertElement(alert) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'spending-alert fade-in';
-            alertDiv.style.cssText = `
-                background: linear-gradient(135deg, #FF3B30, #FF6B6B);
-                color: white;
-                padding: 20px;
-                border-radius: 12px;
-                box-shadow: 0 8px 24px rgba(255, 59, 48, 0.3);
-                border: 2px solid #FF3B30;
-                position: relative;
-                animation: pulse 2s infinite;
-            `;
-            
-            alertDiv.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div style="flex: 1;">
-                        <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700;">
-                            🚨 SPENDING ALERT 🚨
-                        </h3>
-                        <div style="font-size: 14px; line-height: 1.5;">
-                            <div><strong>Category:</strong> ${alert.category}</div>
-                            <div><strong>Current Spending:</strong> $${alert.current_spending.toFixed(2)}</div>
-                            <div><strong>Limit:</strong> $${alert.limit.toFixed(2)}</div>
-                            <div><strong>Threshold:</strong> ${alert.threshold_percentage}%</div>
-                        </div>
-                        <div style="margin-top: 12px; font-weight: 600;">
-                            You've reached ${alert.threshold_percentage}% of your ${alert.category} spending limit!
-                        </div>
-                    </div>
-                    <button onclick="dismissAlert('${alert.key}')" 
-                            style="background: rgba(255, 255, 255, 0.2); border: none; color: white; 
-                                   padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
-                                   transition: background 0.2s ease;">
-                        Dismiss
-                    </button>
-                </div>
-            `;
-            
-            return alertDiv;
-        }
-
-        // Dismiss alert
         function dismissAlert(alertKey) {
             fetch(`/dismiss_alert/${alertKey}`)
                 .then(() => {
-                    loadSpendingAlerts(); // Reload alerts
+                    fetchAlerts();
                 })
                 .catch(error => console.error('Error dismissing alert:', error));
         }
 
-        // Auto-refresh alerts every 30 seconds
-        setInterval(loadSpendingAlerts, 30000);
+        // Initialize alerts and refresh every 30 seconds
+        fetchAlerts();
+        setInterval(fetchAlerts, 30000);
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add fade-in animation to cards
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.card, .stat-card').forEach(card => {
+            observer.observe(card);
+        });
     </script>
 
     <style>
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
+        /* Additional styles for better UX */
+        .main-content {
+            min-height: calc(100vh - 200px);
+            padding: var(--space-xl) 0;
         }
-        
-        .spending-alert {
-            transition: all 0.3s ease;
+
+        .footer {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-primary);
+            padding: var(--space-lg) 0;
+            margin-top: auto;
         }
-        
-        .spending-alert:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(255, 59, 48, 0.4);
+
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Focus styles for accessibility */
+        .nav-link:focus,
+        .btn:focus,
+        .form-input:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-primary);
+            border-radius: var(--radius-md);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--border-secondary);
         }
     </style>
 </body>

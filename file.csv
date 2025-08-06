@@ -1,2 +1,6 @@
-import pandas as pd,Id,Name,Amount,Category,Extra1,Extra2,Date,amount,Subcategory,Location
-,7695,coffee,50.0,Food,,,08/05/2025,,,
+import pandas as pd,Id,Name,Amount,Category,Extra1,Extra2,Date,amount,Subcategory,Location,Destination,Transport_Mode,Academic_Type,Institution
+,7695,coffee,50.0,Food,,,08/05/2025,,,,,,,
+,9792,Food,5.21,Food,,,08/05/2025,,,,,,,
+,8376,moving,700.0,Travel,,,08/05/2025,,,,colorado,work,,
+,1780,fun,100.0,Travel,,,08/05/2025,,,,colorado,fun,,
+,7867,HALF Price bookd,7.49,Academic,,,06/30/2025,,,,,,,
