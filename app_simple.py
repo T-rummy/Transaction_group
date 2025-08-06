@@ -5,6 +5,7 @@ import json
 from datetime import date
 from Transaction_pt2 import Transaction, FoodTransaction, TravelTransaction, TransportationTransaction, BillsUtilitiesTransaction, AcademicTransaction, HealthTransaction
 from achievements import AchievementSystem
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -23,7 +24,7 @@ if not os.path.exists(CSV_FILE):
             "Transport_Type",
             "Bill_Type", "Provider",
             "Academic_Type", "Institution",
-            "Health_Type"
+            "Health_Type", "Notes", "Receipt_Image"
         ])
 
 # Load existing IDs into Transaction._used_ids
@@ -321,6 +322,99 @@ def add_transaction():
         return redirect('/transactions')
 
     return render_template("add.html")
+
+@app.route('/upload_receipt', methods=['GET', 'POST'])
+def upload_receipt():
+    """Upload receipt image and manually enter transaction details."""
+    if request.method == 'POST':
+        try:
+            # Get form data
+            name = request.form['name']
+            amount = float(request.form['amount'])
+            category = request.form['category']
+            date_str = request.form['date']
+            location = request.form.get('location', '')
+            notes = request.form.get('notes', '')
+            
+            # Handle file upload
+            receipt_image = None
+            if 'receipt_image' in request.files:
+                file = request.files['receipt_image']
+                if file and file.filename:
+                    # Create uploads directory if it doesn't exist
+                    upload_folder = 'uploads'
+                    if not os.path.exists(upload_folder):
+                        os.makedirs(upload_folder)
+                    
+                    # Save the file with a secure filename
+                    filename = secure_filename(file.filename)
+                    # Add timestamp to make filename unique
+                    from datetime import datetime
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    filename = f"{timestamp}_{filename}"
+                    filepath = os.path.join(upload_folder, filename)
+                    file.save(filepath)
+                    receipt_image = filename
+            
+            # Create transaction
+            transaction = Transaction(name, amount, date_str, category)
+            
+            # Add optional fields
+            if location:
+                transaction.location = location
+            if notes:
+                transaction.notes = notes
+            if receipt_image:
+                transaction.receipt_image = receipt_image
+            
+            # Save to CSV
+            transactions = read_csv_data(CSV_FILE)
+            transaction_dict = {
+                "Id": transaction.id,
+                "Name": transaction.name,
+                "Amount": transaction.amount,
+                "Date": transaction.date,
+                "Category": transaction.category,
+                "Subcategory": getattr(transaction, 'subcategory', ''),
+                "Location": getattr(transaction, 'location', ''),
+                "Destination": getattr(transaction, 'destination', ''),
+                "Transport_Mode": getattr(transaction, 'transport_mode', ''),
+                "Transport_Type": getattr(transaction, 'transport_type', ''),
+                "Bill_Type": getattr(transaction, 'bill_type', ''),
+                "Provider": getattr(transaction, 'provider', ''),
+                "Academic_Type": getattr(transaction, 'academic_type', ''),
+                "Institution": getattr(transaction, 'institution', ''),
+                "Health_Type": getattr(transaction, 'health_type', ''),
+                "Notes": getattr(transaction, 'notes', ''),
+                "Receipt_Image": getattr(transaction, 'receipt_image', '')
+            }
+            
+            transactions.append(transaction_dict)
+            
+            fieldnames = [
+                "Id", "Name", "Amount", "Date", "Category",
+                "Subcategory", "Location",
+                "Destination", "Transport_Mode",
+                "Transport_Type",
+                "Bill_Type", "Provider",
+                "Academic_Type", "Institution",
+                "Health_Type", "Notes", "Receipt_Image"
+            ]
+            write_csv_data(CSV_FILE, transactions, fieldnames)
+            
+            # Check spending limits
+            check_spending_limits(category, amount)
+            
+            flash("Transaction with receipt uploaded successfully!")
+            return redirect('/transactions')
+            
+        except Exception as e:
+            flash(f"Error uploading receipt: {str(e)}")
+            return redirect('/upload_receipt')
+    
+    # GET request - show the form
+    today = date.today().strftime("%Y-%m-%d")
+    return render_template("upload_receipt.html", today=today)
 
 @app.route('/modify', methods=['GET', 'POST'])
 def modify():
