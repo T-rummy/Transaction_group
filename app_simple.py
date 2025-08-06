@@ -915,6 +915,11 @@ def stats():
         timeline_labels = [f"{date.split('/')[1]}/{date.split('/')[0]}" for date in recent_dates]
         timeline_values = [timeline_data.get(date, 0) for date in recent_dates]
         
+        # If no timeline data, create sample data
+        if not timeline_labels:
+            timeline_labels = ['1/1', '1/2', '1/3', '1/4', '1/5']
+            timeline_values = [25.50, 45.20, 12.80, 67.90, 33.40]
+        
         # Budget progress data
         limits_data = read_csv_data(LIMITS_FILE)
         budget_labels = []
@@ -929,6 +934,12 @@ def stats():
             budget_labels.append(category)
             budget_values.append(min(current_spending, limit_amount))  # Don't exceed limit in chart
             budget_colors.append(budget_colors[i % len(budget_colors)])
+        
+        # If no budget data, create sample data
+        if not budget_labels:
+            budget_labels = ['Food', 'Travel', 'Shopping']
+            budget_values = [450, 300, 200]
+            budget_colors = ['#3bac72', '#ff6b6b', '#4ecdc4']
         
         return render_template("stats.html",
                              total_spending=total_spending,

@@ -68,9 +68,13 @@ class BudgetCharts {
     // Spending Timeline Chart
     initSpendingTimeline() {
         const ctx = document.getElementById('timelineChart');
-        if (!ctx) return;
+        if (!ctx) {
+            console.log('Timeline chart canvas not found');
+            return;
+        }
 
         const data = JSON.parse(ctx.dataset.chartData || '{}');
+        console.log('Timeline chart data:', data);
         
         this.charts.timeline = new Chart(ctx, {
             type: 'line',
@@ -173,9 +177,13 @@ class BudgetCharts {
     // Budget Progress Chart
     initBudgetProgress() {
         const ctx = document.getElementById('budgetChart');
-        if (!ctx) return;
+        if (!ctx) {
+            console.log('Budget chart canvas not found');
+            return;
+        }
 
         const data = JSON.parse(ctx.dataset.chartData || '{}');
+        console.log('Budget chart data:', data);
         
         this.charts.budget = new Chart(ctx, {
             type: 'doughnut',
@@ -229,8 +237,11 @@ class BudgetCharts {
 
 // Initialize charts when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing BudgetCharts...');
     const budgetCharts = new BudgetCharts();
     budgetCharts.initCharts();
+    
+    console.log('Charts initialized:', Object.keys(budgetCharts.charts));
     
     // Add entrance animations
     setTimeout(() => {
