@@ -1,0 +1,604 @@
+from flask import Flask, render_template, request, redirect, flash, url_for, jsonify
+import csv
+import os
+import json
+from datetime import date
+from Transaction_pt2 import Transaction, FoodTransaction, TravelTransaction, TransportationTransaction, BillsUtilitiesTransaction, AcademicTransaction, HealthTransaction
+
+app = Flask(__name__)
+app.secret_key = "supersecretkey"
+
+CSV_FILE = "file.csv"
+LIMITS_FILE = "limits.csv"
+
+# Ensure CSV exists with all columns
+if not os.path.exists(CSV_FILE):
+    with open(CSV_FILE, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            "Id", "Name", "Amount", "Date", "Category",
+            "Subcategory", "Location",
+            "Destination", "Transport_Mode",
+            "Transport_Type",
+            "Bill_Type", "Provider",
+            "Academic_Type", "Institution",
+            "Health_Type"
+        ])
+
+# Load existing IDs into Transaction._used_ids
+if os.path.exists(CSV_FILE):
+    with open(CSV_FILE, 'r') as f:
+        reader = csv.DictReader(f)
+        Transaction._used_ids = set()
+        for row in reader:
+            if row.get("Id") and row["Id"].strip():
+                try:
+                    Transaction._used_ids.add(int(row["Id"]))
+                except ValueError:
+                    pass
+
+# Ensure limits CSV exists
+if not os.path.exists(LIMITS_FILE):
+    with open(LIMITS_FILE, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Category", "Limit", "Alert_Threshold"])
+
+def read_csv_data(filename):
+    """Read CSV data and return as list of dictionaries."""
+    if not os.path.exists(filename):
+        return []
+    
+    with open(filename, 'r') as f:
+        reader = csv.DictReader(f)
+        return list(reader)
+
+def write_csv_data(filename, data, fieldnames):
+    """Write data to CSV file."""
+    with open(filename, 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(data)
+
+def get_monthly_spending(category):
+    """Calculate monthly spending for a category."""
+    transactions = read_csv_data(CSV_FILE)
+    current_month = date.today().strftime("%m")
+    total = 0.0
+    
+    for tx in transactions:
+        if tx.get("Category") == category:
+            # Extract month from date
+            date_str = tx.get("Date", "")
+            if "/" in date_str:
+                tx_month = date_str.split("/")[0]
+                if tx_month == current_month:
+                    try:
+                        amount = float(tx.get("Amount", 0))
+                        total += amount
+                    except ValueError:
+                        pass
+    
+    return total
+
+# Website Notification Function
+def create_spending_alert(category, current_spending, limit, threshold_percentage):
+    """Create a spending alert notification for the website."""
+    try:
+        alert_message = f"🚨 SPENDING ALERT 🚨\n\nCategory: {category}\nCurrent Spending: ${current_spending:.2f}\nLimit: ${limit:.2f}\nThreshold: {threshold_percentage}%\n\nYou've reached {threshold_percentage}% of your {category} spending limit!"
+        
+        # Store the alert in a file for the website to read
+        alert_data = {
+            'category': category,
+            'current_spending': float(current_spending),
+            'limit': float(limit),
+            'threshold_percentage': int(threshold_percentage),
+            'message': alert_message,
+            'timestamp': str(date.today())
+        }
+        
+        # Read existing alerts
+        alert_file = "active_alerts.json"
+        if os.path.exists(alert_file):
+            with open(alert_file, 'r') as f:
+                alerts = json.load(f)
+        else:
+            alerts = []
+        
+        # Create a unique key based on spending level
+        spending_level = int(current_spending / (limit * threshold_percentage / 100))
+        alert_key = f"{category}_{threshold_percentage}_{spending_level}"
+        
+        if not any(alert.get('key') == alert_key for alert in alerts):
+            alert_data['key'] = alert_key
+            alerts.append(alert_data)
+            
+            # Save alerts
+            with open(alert_file, 'w') as f:
+                json.dump(alerts, f)
+            
+            print(f"Spending alert created for {category}: ${current_spending:.2f} / ${limit:.2f} ({threshold_percentage}%)")
+            return True
+        else:
+            print(f"Alert already exists for {category} at {threshold_percentage}% threshold, level {spending_level}")
+        
+        return False
+    except Exception as e:
+        print(f"Error creating spending alert: {e}")
+        return False
+
+def check_spending_limits(category, new_amount):
+    """Check if adding a new transaction would trigger a spending limit alert."""
+    try:
+        if not os.path.exists(LIMITS_FILE):
+            return
+        
+        limits_data = read_csv_data(LIMITS_FILE)
+        if not limits_data:
+            return
+        
+        # Find limit for this category
+        category_limit = None
+        for limit_row in limits_data:
+            if limit_row.get("Category") == category:
+                category_limit = limit_row
+                break
+        
+        if not category_limit:
+            return
+        
+        limit_amount = float(category_limit.get("Limit", 0))
+        threshold_percentage = int(category_limit.get("Alert_Threshold", 0))
+        
+        # Calculate current spending for this category
+        monthly_spending = get_monthly_spending(category)
+        
+        # Add the new transaction amount
+        total_spending = monthly_spending + float(new_amount)
+        
+        # Check if this would trigger an alert
+        threshold_amount = limit_amount * (threshold_percentage / 100)
+        
+        print(f"Debug - Category: {category}, Monthly spending: ${monthly_spending:.2f}, New amount: ${float(new_amount):.2f}, Total: ${total_spending:.2f}")
+        print(f"Debug - Limit: ${limit_amount:.2f}, Threshold: {threshold_percentage}%, Threshold amount: ${threshold_amount:.2f}")
+        
+        if total_spending >= threshold_amount:
+            # Create website alert
+            create_spending_alert(category, total_spending, limit_amount, threshold_percentage)
+    
+    except Exception as e:
+        print(f"Error checking spending limits: {e}")
+
+# ===========================
+# ROUTES
+# ===========================
+
+@app.route('/')
+def index():
+    """Home page with dashboard overview."""
+    try:
+        # Get today's date
+        today = date.today().strftime("%Y-%m-%d")
+        
+        # Load transactions for stats
+        transactions = read_csv_data(CSV_FILE)
+        
+        # Calculate stats for current month
+        current_month = date.today().strftime("%m/%Y")
+        monthly_transactions = []
+        total_spending = 0.0
+        
+        for tx in transactions:
+            if current_month in tx.get('Date', ''):
+                monthly_transactions.append(tx)
+                try:
+                    amount = float(tx.get('Amount', 0))
+                    total_spending += amount
+                except ValueError:
+                    pass
+        
+        transaction_count = len(monthly_transactions)
+        avg_transaction = total_spending / transaction_count if transaction_count > 0 else 0
+        
+        # Get top category
+        category_counts = {}
+        for tx in monthly_transactions:
+            category = tx.get('Category', 'Unknown')
+            category_counts[category] = category_counts.get(category, 0) + 1
+        
+        top_category = max(category_counts.items(), key=lambda x: x[1])[0] if category_counts else 'N/A'
+        
+        # Get recent transactions (last 5)
+        recent_transactions = transactions[-5:] if transactions else []
+        
+        return render_template('index.html', 
+                             today=today,
+                             total_spending=f"{total_spending:.2f}",
+                             transaction_count=transaction_count,
+                             avg_transaction=f"${avg_transaction:.2f}",
+                             top_category=top_category,
+                             recent_transactions=recent_transactions)
+                             
+    except Exception as e:
+        print(f"Error in index route: {e}")
+        return render_template('index.html', 
+                             today=date.today().strftime("%Y-%m-%d"),
+                             total_spending="0.00",
+                             transaction_count=0,
+                             avg_transaction="$0.00",
+                             top_category="N/A",
+                             recent_transactions=[])
+
+@app.route('/transactions')
+def transactions():
+    try:
+        transactions_list = read_csv_data(CSV_FILE)
+    except Exception as e:
+        print(f"Error reading transactions: {e}")
+        transactions_list = []
+    return render_template('transactions.html', transactions=transactions_list)
+
+@app.route('/add', methods=['GET', 'POST'])
+def add_transaction():
+    if request.method == 'POST':
+        transactions = read_csv_data(CSV_FILE)
+
+        name = request.form.get("name")
+        amount = request.form.get("amount")
+        category = request.form.get("category")
+        today = date.today().strftime("%m/%d/%Y")
+
+        if category == "Food":
+            tx = FoodTransaction(name, amount, today, category, request.form.get("extra1", ""), request.form.get("extra2", ""))
+        elif category == "Travel":
+            tx = TravelTransaction(name, amount, today, category, request.form.get("extra1", ""), request.form.get("extra2", ""))
+        elif category == "Transportation":
+            tx = TransportationTransaction(name, amount, today, category, request.form.get("extra1", ""), request.form.get("extra2", ""))
+        elif category == "Bills & Utilities":
+            tx = BillsUtilitiesTransaction(name, amount, today, category, request.form.get("extra1", ""), request.form.get("extra2", ""))
+        elif category == "Academic":
+            tx = AcademicTransaction(name, amount, today, category, request.form.get("extra1", ""), request.form.get("extra2", ""))
+        elif category == "Health":
+            tx = HealthTransaction(name, amount, today, category, request.form.get("extra1", ""), request.form.get("extra2", ""))
+        else:
+            tx = Transaction(name, amount, today, category)
+
+        # Add new transaction
+        transactions.append(tx.get_info())
+        
+        # Write back to CSV
+        fieldnames = [
+            "Id", "Name", "Amount", "Date", "Category",
+            "Subcategory", "Location",
+            "Destination", "Transport_Mode",
+            "Transport_Type",
+            "Bill_Type", "Provider",
+            "Academic_Type", "Institution",
+            "Health_Type"
+        ]
+        write_csv_data(CSV_FILE, transactions, fieldnames)
+
+        # Check if this transaction triggers a spending limit alert
+        check_spending_limits(category, amount)
+
+        flash("Transaction added successfully!")
+        return redirect('/transactions')
+
+    return render_template("add.html")
+
+@app.route('/modify', methods=['GET', 'POST'])
+def modify():
+    transactions = read_csv_data(CSV_FILE)
+    if request.method == 'POST':
+        try:
+            transaction_id = int(request.form['transaction_id'])
+            column = request.form['field']
+            new_value = request.form['new_value']
+
+            if column == "Amount":
+                new_value = float(new_value)
+
+            # Update the transaction
+            for tx in transactions:
+                if int(tx.get('Id', 0)) == transaction_id:
+                    tx[column] = new_value
+                    break
+            
+            # Write back to CSV
+            fieldnames = [
+                "Id", "Name", "Amount", "Date", "Category",
+                "Subcategory", "Location",
+                "Destination", "Transport_Mode",
+                "Transport_Type",
+                "Bill_Type", "Provider",
+                "Academic_Type", "Institution",
+                "Health_Type"
+            ]
+            write_csv_data(CSV_FILE, transactions, fieldnames)
+            
+            flash("Transaction updated successfully!")
+            return redirect('/transactions')
+        except Exception as e:
+            flash(f"Error updating transaction: {str(e)}")
+
+    return render_template("modify.html", transactions=transactions)
+
+@app.route('/delete/<int:transaction_id>', methods=['POST'])
+def delete_transaction(transaction_id):
+    transactions = read_csv_data(CSV_FILE)
+    transactions = [tx for tx in transactions if int(tx.get('Id', 0)) != transaction_id]
+    
+    fieldnames = [
+        "Id", "Name", "Amount", "Date", "Category",
+        "Subcategory", "Location",
+        "Destination", "Transport_Mode",
+        "Transport_Type",
+        "Bill_Type", "Provider",
+        "Academic_Type", "Institution",
+        "Health_Type"
+    ]
+    write_csv_data(CSV_FILE, transactions, fieldnames)
+    return redirect('/transactions')
+
+# ===========================
+# LIMITS ROUTES
+# ===========================
+
+@app.route('/limits', methods=['GET'])
+def limits():
+    """Display all spending limits."""
+    limits_data = read_csv_data(LIMITS_FILE)
+    return render_template('limits.html', limits=limits_data)
+
+@app.route('/set_limits', methods=['GET', 'POST'])
+def set_limit():
+    """Add or update a spending limit."""
+    if request.method == 'POST':
+        category = request.form['category']
+        limit = float(request.form['limit'])
+        alert_threshold = int(request.form['alert_threshold'])
+
+        # Read existing limits
+        limits_data = read_csv_data(LIMITS_FILE)
+        
+        # Check if category exists
+        category_exists = False
+        for limit_row in limits_data:
+            if limit_row.get("Category") == category:
+                limit_row["Limit"] = limit
+                limit_row["Alert_Threshold"] = alert_threshold
+                category_exists = True
+                break
+        
+        if not category_exists:
+            limits_data.append({
+                "Category": category,
+                "Limit": limit,
+                "Alert_Threshold": alert_threshold
+            })
+
+        # Write back to CSV
+        write_csv_data(LIMITS_FILE, limits_data, ["Category", "Limit", "Alert_Threshold"])
+        
+        flash(f"Limit for {category} saved successfully!")
+        return redirect(url_for('limits'))
+
+    limits_data = read_csv_data(LIMITS_FILE)
+    return render_template('set_limits.html', limits=limits_data)
+
+@app.route('/delete_limit/<category>', methods=['POST'])
+def delete_limit(category):
+    """Delete a spending limit."""
+    limits_data = read_csv_data(LIMITS_FILE)
+    limits_data = [limit_row for limit_row in limits_data if limit_row.get("Category") != category]
+    write_csv_data(LIMITS_FILE, limits_data, ["Category", "Limit", "Alert_Threshold"])
+    flash(f"Limit for {category} deleted successfully!")
+    return redirect(url_for('limits'))
+
+@app.route('/edit_limit', methods=['POST'])
+def edit_limit():
+    """Edit an existing spending limit."""
+    category = request.form['category']
+    limit = float(request.form['limit'])
+    alert_threshold = int(request.form['alert_threshold'])
+
+    limits_data = read_csv_data(LIMITS_FILE)
+    
+    # Update the existing limit
+    for limit_row in limits_data:
+        if limit_row.get("Category") == category:
+            limit_row["Limit"] = limit
+            limit_row["Alert_Threshold"] = alert_threshold
+            break
+    
+    write_csv_data(LIMITS_FILE, limits_data, ["Category", "Limit", "Alert_Threshold"])
+    
+    flash(f"Limit for {category} updated successfully!")
+    return redirect(url_for('limits'))
+
+@app.route('/test_alert')
+def test_alert():
+    """Test website alert functionality (for development only)."""
+    try:
+        # Test with sample data
+        category = "Food"
+        current_spending = 180.0
+        limit = 200.0
+        threshold_percentage = 80
+        
+        success = create_spending_alert(category, current_spending, limit, threshold_percentage)
+        
+        if success:
+            flash("Website alert test completed! Check the alerts section.")
+        else:
+            flash("Website alert test failed. Check the console for errors.")
+            
+        return redirect(url_for('limits'))
+    except Exception as e:
+        flash(f"Alert test error: {str(e)}")
+        return redirect(url_for('limits'))
+
+@app.route('/get_alerts')
+def get_alerts():
+    """Get active spending alerts."""
+    try:
+        alert_file = "active_alerts.json"
+        if os.path.exists(alert_file):
+            with open(alert_file, 'r') as f:
+                alerts = json.load(f)
+            return jsonify(alerts)
+        else:
+            return jsonify([])
+    except Exception as e:
+        return jsonify([])
+
+@app.route('/dismiss_alert/<alert_key>')
+def dismiss_alert(alert_key):
+    """Dismiss a spending alert."""
+    try:
+        alert_file = "active_alerts.json"
+        if os.path.exists(alert_file):
+            with open(alert_file, 'r') as f:
+                alerts = json.load(f)
+            
+            # Remove the alert
+            alerts = [alert for alert in alerts if alert.get('key') != alert_key]
+            
+            with open(alert_file, 'w') as f:
+                json.dump(alerts, f)
+        
+        return redirect(request.referrer or url_for('index'))
+    except Exception as e:
+        flash(f"Error dismissing alert: {str(e)}")
+        return redirect(request.referrer or url_for('index'))
+
+@app.route('/scan_receipt', methods=['GET', 'POST'])
+def scan_receipt():
+    """Receipt scanning placeholder - redirects to manual entry."""
+    flash('Receipt scanning is not available in the deployed version. Please use manual entry.')
+    return redirect('/add')
+
+@app.route('/confirm_receipt', methods=['GET', 'POST'])
+def confirm_receipt():
+    """Receipt confirmation placeholder."""
+    flash('Receipt scanning is not available in the deployed version. Please use manual entry.')
+    return redirect('/add')
+
+# Stats Page
+@app.route('/stats')
+def stats():
+    """Analytics dashboard with spending insights."""
+    try:
+        transactions = read_csv_data(CSV_FILE)
+        
+        if not transactions:
+            return render_template("stats.html",
+                                 total_spending=0,
+                                 transaction_count=0,
+                                 avg_transaction=0,
+                                 unique_categories=0,
+                                 category_labels=[],
+                                 category_values=[],
+                                 monthly_labels=[],
+                                 monthly_values=[],
+                                 category_stats=[],
+                                 recent_transactions=[])
+        
+        # Basic stats
+        total_spending = 0.0
+        for tx in transactions:
+            try:
+                amount = float(tx.get('Amount', 0))
+                total_spending += amount
+            except ValueError:
+                pass
+        
+        transaction_count = len(transactions)
+        avg_transaction = total_spending / transaction_count if transaction_count > 0 else 0
+        
+        # Category analysis
+        category_stats = []
+        category_totals = {}
+        category_counts = {}
+        
+        for tx in transactions:
+            category = tx.get('Category', 'Unknown')
+            try:
+                amount = float(tx.get('Amount', 0))
+                category_totals[category] = category_totals.get(category, 0) + amount
+                category_counts[category] = category_counts.get(category, 0) + 1
+            except ValueError:
+                pass
+        
+        for category, total in category_totals.items():
+            count = category_counts.get(category, 0)
+            average = total / count if count > 0 else 0
+            percentage = (total / total_spending * 100) if total_spending > 0 else 0
+            
+            category_stats.append({
+                'name': category,
+                'total': total,
+                'count': count,
+                'average': average,
+                'percentage': percentage
+            })
+        
+        # Sort by total spending
+        category_stats.sort(key=lambda x: x['total'], reverse=True)
+        
+        # Chart data
+        category_labels = [cat['name'] for cat in category_stats]
+        category_values = [cat['total'] for cat in category_stats]
+        
+        # Monthly data (last 6 months)
+        monthly_totals = {}
+        for tx in transactions:
+            date_str = tx.get('Date', '')
+            if '/' in date_str:
+                month = date_str.split('/')[0]
+                try:
+                    amount = float(tx.get('Amount', 0))
+                    monthly_totals[month] = monthly_totals.get(month, 0) + amount
+                except ValueError:
+                    pass
+        
+        # Get last 6 months
+        sorted_months = sorted(monthly_totals.keys())
+        recent_months = sorted_months[-6:] if len(sorted_months) > 6 else sorted_months
+        monthly_labels = [f"Month {month}" for month in recent_months]
+        monthly_values = [monthly_totals.get(month, 0) for month in recent_months]
+        
+        # Recent transactions
+        recent_transactions = transactions[-10:] if len(transactions) > 10 else transactions
+        
+        # Unique categories
+        unique_categories = len(category_stats)
+        
+        return render_template("stats.html",
+                             total_spending=total_spending,
+                             transaction_count=transaction_count,
+                             avg_transaction=avg_transaction,
+                             unique_categories=unique_categories,
+                             category_labels=category_labels,
+                             category_values=category_values,
+                             monthly_labels=monthly_labels,
+                             monthly_values=monthly_values,
+                             category_stats=category_stats,
+                             recent_transactions=recent_transactions)
+                             
+    except Exception as e:
+        print(f"Error in stats route: {e}")
+        return render_template("stats.html",
+                             total_spending=0,
+                             transaction_count=0,
+                             avg_transaction=0,
+                             unique_categories=0,
+                             category_labels=[],
+                             category_values=[],
+                             monthly_labels=[],
+                             monthly_values=[],
+                             category_stats=[],
+                             recent_transactions=[])
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host="0.0.0.0", port=port, debug=False) 
