@@ -869,8 +869,6 @@ def stats():
         category_labels = [cat['name'] for cat in category_stats]
         category_values = [cat['total'] for cat in category_stats]
         
-
-        
         # Recent transactions
         recent_transactions = transactions[-10:] if len(transactions) > 10 else transactions
         
@@ -896,7 +894,6 @@ def stats():
         
         for date in recent_dates:
             try:
-                # Keep original date format for labels
                 timeline_labels.append(date)
                 timeline_values.append(timeline_data.get(date, 0))
             except Exception as e:
@@ -907,8 +904,6 @@ def stats():
         if not timeline_labels:
             timeline_labels = ['1/1', '1/2', '1/3', '1/4', '1/5']
             timeline_values = [25.50, 45.20, 12.80, 67.90, 33.40]
-        
-
         
         return render_template("stats.html",
                              total_spending=total_spending,
