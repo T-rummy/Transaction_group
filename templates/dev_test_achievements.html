@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Developer - Achievement Testing{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-primary mb-4">🔧 Achievement Testing</h1>
+        <p class="text-secondary text-lg">Developer tools for testing achievement system</p>
+        <div class="text-xs text-secondary mt-2">This page is hidden from regular users</div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="mb-8">
+                {% for message in messages %}
+                    <div class="alert alert-success fade-in">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Current Stats -->
+    <div class="card mb-8">
+        <div class="card-header">
+            <h3 class="card-title">📊 Current Data</h3>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-primary">{{ transaction_count }}</div>
+                <div class="text-sm text-secondary">Transactions</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-primary">{{ categories_used }}</div>
+                <div class="text-sm text-secondary">Categories Used</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-primary">{{ limits_count }}</div>
+                <div class="text-sm text-secondary">Limits Set</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-primary">${{ "%.2f"|format(today_spending) }}</div>
+                <div class="text-sm text-secondary">Today's Spending</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Status -->
+    <div class="card mb-8">
+        <div class="card-header">
+            <h3 class="card-title">🏆 Achievement Status</h3>
+        </div>
+        <div class="p-6">
+            <div class="space-y-3">
+                {% for result in test_results %}
+                <div class="flex items-center p-3 bg-gray-100 rounded-lg">
+                    <span class="text-lg mr-3">{{ "✅" if "✅" in result else "❌" }}</span>
+                    <span class="text-sm">{{ result.replace("✅ ", "").replace("❌ ", "") }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Reset Achievements -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🔄 Reset All</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-secondary text-sm mb-4">Clear all unlocked achievements to test them again</p>
+                <form method="POST" action="{{ url_for('reset_achievements') }}" class="inline">
+                    <button type="submit" class="btn btn-danger w-full">
+                        Reset Achievements
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Test Transaction -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">➕ Add Test Transaction</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-secondary text-sm mb-4">Add a $15 Food transaction for today</p>
+                <form method="POST" action="{{ url_for('add_test_transaction') }}" class="inline">
+                    <button type="submit" class="btn btn-primary w-full">
+                        Add Test Transaction
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- View Achievements -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🏆 View Achievements</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-secondary text-sm mb-4">Go to the achievements page to see current progress</p>
+                <a href="{{ url_for('achievements') }}" class="btn btn-secondary w-full">
+                    View Achievements
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testing Instructions -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">📋 Testing Instructions</h3>
+        </div>
+        <div class="p-6">
+            <div class="space-y-3 text-sm">
+                <div class="flex items-start">
+                    <span class="text-primary mr-2">1.</span>
+                    <span>Use "Reset Achievements" to clear all progress</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="text-primary mr-2">2.</span>
+                    <span>Use "Add Test Transaction" to quickly add transactions</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="text-primary mr-2">3.</span>
+                    <span>Check the achievement status above to see what's ready to unlock</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="text-primary mr-2">4.</span>
+                    <span>Visit the achievements page to see confetti animations</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="text-primary mr-2">5.</span>
+                    <span>Add real transactions through the normal interface to test naturally</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="text-center mt-8">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">
+            ← Back to Main App
+        </a>
+    </div>
+</div>
+
+<style>
+/* Developer-specific styles */
+.dev-warning {
+    background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+</style>
+{% endblock %} 

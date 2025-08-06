@@ -525,6 +525,118 @@ def clear_all_alerts():
         flash(f"Error clearing alerts: {str(e)}")
         return redirect(url_for('index'))
 
+@app.route('/dev/test_achievements')
+def test_achievements():
+    """Developer route to test achievements (hidden from users)."""
+    try:
+        achievement_system = AchievementSystem()
+        
+        # Get current data
+        transactions = read_csv_data(CSV_FILE)
+        limits_data = read_csv_data(LIMITS_FILE)
+        
+        # Test different achievement scenarios
+        test_results = []
+        
+        # Test 1: First transaction achievement
+        if len(transactions) == 0:
+            test_results.append("✅ First transaction achievement ready (add any transaction)")
+        else:
+            test_results.append("❌ First transaction already achieved")
+        
+        # Test 2: Ten transactions achievement
+        if len(transactions) < 10:
+            needed = 10 - len(transactions)
+            test_results.append(f"✅ Ten transactions: {len(transactions)}/10 (need {needed} more)")
+        else:
+            test_results.append("❌ Ten transactions already achieved")
+        
+        # Test 3: Fifty transactions achievement
+        if len(transactions) < 50:
+            needed = 50 - len(transactions)
+            test_results.append(f"✅ Fifty transactions: {len(transactions)}/50 (need {needed} more)")
+        else:
+            test_results.append("❌ Fifty transactions already achieved")
+        
+        # Test 4: Category achievements
+        categories_used = set(tx.get('Category', '') for tx in transactions)
+        if len(categories_used) < 5:
+            needed = 5 - len(categories_used)
+            test_results.append(f"✅ Five categories: {len(categories_used)}/5 (need {needed} more)")
+        else:
+            test_results.append("❌ Five categories already achieved")
+        
+        # Test 5: Budget achievements
+        if len(limits_data) == 0:
+            test_results.append("✅ Budget setter: Set any spending limit")
+        else:
+            test_results.append("❌ Budget setter already achieved")
+        
+        # Test 6: Low spending day
+        today = date.today().strftime("%m/%d/%Y")
+        today_spending = sum(float(tx.get('Amount', 0)) for tx in transactions if tx.get('Date') == today)
+        if today_spending > 0 and today_spending < 20:
+            test_results.append("✅ Low spending day: Already achieved today!")
+        elif today_spending >= 20:
+            test_results.append("❌ Low spending day: Today's spending is $20+")
+        else:
+            test_results.append("✅ Low spending day: Add transaction under $20 today")
+        
+        return render_template('dev_test_achievements.html', 
+                             test_results=test_results,
+                             transaction_count=len(transactions),
+                             categories_used=len(categories_used),
+                             limits_count=len(limits_data),
+                             today_spending=today_spending)
+                             
+    except Exception as e:
+        return f"Error testing achievements: {str(e)}"
+
+@app.route('/dev/reset_achievements', methods=['GET', 'POST'])
+def reset_achievements():
+    """Developer route to reset all achievements (hidden from users)."""
+    try:
+        achievement_system = AchievementSystem()
+        achievement_system.achievements = {"unlocked": [], "progress": {}}
+        achievement_system.save_achievements()
+        flash("All achievements reset! You can now test them again.")
+        return redirect(url_for('test_achievements'))
+    except Exception as e:
+        flash(f"Error resetting achievements: {str(e)}")
+        return redirect(url_for('test_achievements'))
+
+@app.route('/dev/add_test_transaction', methods=['GET', 'POST'])
+def add_test_transaction():
+    """Developer route to add a test transaction (hidden from users)."""
+    try:
+        # Add a test transaction
+        test_transaction = {
+            'Id': '9999',
+            'Name': 'Test Transaction',
+            'Amount': '15.00',
+            'Date': date.today().strftime("%m/%d/%Y"),
+            'Category': 'Food'
+        }
+        
+        # Read existing transactions
+        transactions = read_csv_data(CSV_FILE)
+        transactions.append(test_transaction)
+        
+        # Write back to CSV
+        fieldnames = [
+            "Id", "Name", "Amount", "Date", "Category",
+            "Subcategory", "Location", "Destination", "Transport_Mode",
+            "Transport_Type", "Bill_Type", "Provider",
+            "Academic_Type", "Institution", "Health_Type"
+        ]
+        write_csv_data(CSV_FILE, transactions, fieldnames)
+        
+        flash("Test transaction added! Check achievements.")
+        return redirect(url_for('test_achievements'))
+    except Exception as e:
+        flash(f"Error adding test transaction: {str(e)}")
+        return redirect(url_for('test_achievements'))
+
 @app.route('/achievements')
 def achievements():
     """Achievements page showing user progress and unlocked badges."""
