@@ -912,8 +912,17 @@ def stats():
         # Get last 30 days
         sorted_dates = sorted(timeline_data.keys())
         recent_dates = sorted_dates[-30:] if len(sorted_dates) > 30 else sorted_dates
-        timeline_labels = [f"{date.split('/')[1]}/{date.split('/')[0]}" for date in recent_dates]
-        timeline_values = [timeline_data.get(date, 0) for date in recent_dates]
+        timeline_labels = []
+        timeline_values = []
+        
+        for date in recent_dates:
+            try:
+                # Keep original date format for labels
+                timeline_labels.append(date)
+                timeline_values.append(timeline_data.get(date, 0))
+            except Exception as e:
+                print(f"Error processing date {date}: {e}")
+                continue
         
         # If no timeline data, create sample data
         if not timeline_labels:
@@ -927,13 +936,17 @@ def stats():
         budget_colors = ['#3bac72', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57']
         
         for i, limit in enumerate(limits_data):
-            category = limit.get('Category')
-            limit_amount = float(limit.get('Limit', 0))
-            current_spending = get_monthly_spending(category)
-            
-            budget_labels.append(category)
-            budget_values.append(min(current_spending, limit_amount))  # Don't exceed limit in chart
-            budget_colors.append(budget_colors[i % len(budget_colors)])
+            try:
+                category = limit.get('Category')
+                limit_amount = float(limit.get('Limit', 0))
+                current_spending = get_monthly_spending(category)
+                
+                budget_labels.append(category)
+                budget_values.append(min(current_spending, limit_amount))  # Don't exceed limit in chart
+                budget_colors.append(budget_colors[i % len(budget_colors)])
+            except Exception as e:
+                print(f"Error processing budget limit {limit}: {e}")
+                continue
         
         # If no budget data, create sample data
         if not budget_labels:
