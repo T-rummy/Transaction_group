@@ -84,6 +84,12 @@ class BudgetCharts {
         }
         
         try {
+            // Add visual debugging
+            const debugDiv = document.getElementById('timeline-debug');
+            if (debugDiv) {
+                debugDiv.innerHTML = `Creating timeline chart with ${data.labels.length} labels and ${data.values.length} values`;
+            }
+            
             this.charts.timeline = new Chart(ctx, {
             type: 'line',
             data: {
@@ -134,6 +140,10 @@ class BudgetCharts {
         });
         } catch (error) {
             console.error('Error creating timeline chart:', error);
+            const debugDiv = document.getElementById('timeline-debug');
+            if (debugDiv) {
+                debugDiv.innerHTML = `ERROR: ${error.message}`;
+            }
         }
     }
 
@@ -204,6 +214,12 @@ class BudgetCharts {
         }
         
         try {
+            // Add visual debugging
+            const debugDiv = document.getElementById('budget-debug');
+            if (debugDiv) {
+                debugDiv.innerHTML = `Creating budget chart with ${data.labels.length} labels and ${data.values.length} values`;
+            }
+            
             this.charts.budget = new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -238,6 +254,10 @@ class BudgetCharts {
         });
         } catch (error) {
             console.error('Error creating budget chart:', error);
+            const debugDiv = document.getElementById('budget-debug');
+            if (debugDiv) {
+                debugDiv.innerHTML = `ERROR: ${error.message}`;
+            }
         }
     }
 
