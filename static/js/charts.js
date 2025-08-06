@@ -68,29 +68,11 @@ class BudgetCharts {
     // Spending Timeline Chart
     initSpendingTimeline() {
         const ctx = document.getElementById('timelineChart');
-        if (!ctx) {
-            console.log('Timeline chart canvas not found');
-            return;
-        }
+        if (!ctx) return;
 
         const data = JSON.parse(ctx.dataset.chartData || '{}');
-        console.log('Timeline chart data:', data);
-        console.log('Timeline labels:', data.labels);
-        console.log('Timeline values:', data.values);
         
-        if (!data.labels || data.labels.length === 0) {
-            console.log('No timeline data available');
-            return;
-        }
-        
-        try {
-            // Add visual debugging
-            const debugDiv = document.getElementById('timeline-debug');
-            if (debugDiv) {
-                debugDiv.innerHTML = `Creating timeline chart with ${data.labels.length} labels and ${data.values.length} values`;
-            }
-            
-            this.charts.timeline = new Chart(ctx, {
+        this.charts.timeline = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: data.labels || [],
@@ -138,13 +120,6 @@ class BudgetCharts {
                 }
             }
         });
-        } catch (error) {
-            console.error('Error creating timeline chart:', error);
-            const debugDiv = document.getElementById('timeline-debug');
-            if (debugDiv) {
-                debugDiv.innerHTML = `ERROR: ${error.message}`;
-            }
-        }
     }
 
     // Monthly Comparison Chart
@@ -198,29 +173,11 @@ class BudgetCharts {
     // Budget Progress Chart
     initBudgetProgress() {
         const ctx = document.getElementById('budgetChart');
-        if (!ctx) {
-            console.log('Budget chart canvas not found');
-            return;
-        }
+        if (!ctx) return;
 
         const data = JSON.parse(ctx.dataset.chartData || '{}');
-        console.log('Budget chart data:', data);
-        console.log('Budget labels:', data.labels);
-        console.log('Budget values:', data.values);
         
-        if (!data.labels || data.labels.length === 0) {
-            console.log('No budget data available');
-            return;
-        }
-        
-        try {
-            // Add visual debugging
-            const debugDiv = document.getElementById('budget-debug');
-            if (debugDiv) {
-                debugDiv.innerHTML = `Creating budget chart with ${data.labels.length} labels and ${data.values.length} values`;
-            }
-            
-            this.charts.budget = new Chart(ctx, {
+        this.charts.budget = new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: data.labels || [],
@@ -252,13 +209,6 @@ class BudgetCharts {
                 }
             }
         });
-        } catch (error) {
-            console.error('Error creating budget chart:', error);
-            const debugDiv = document.getElementById('budget-debug');
-            if (debugDiv) {
-                debugDiv.innerHTML = `ERROR: ${error.message}`;
-            }
-        }
     }
 
     // Update chart data
