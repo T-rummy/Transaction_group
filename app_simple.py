@@ -869,23 +869,7 @@ def stats():
         category_labels = [cat['name'] for cat in category_stats]
         category_values = [cat['total'] for cat in category_stats]
         
-        # Monthly data (last 6 months)
-        monthly_totals = {}
-        for tx in transactions:
-            date_str = tx.get('Date', '')
-            if '/' in date_str:
-                month = date_str.split('/')[0]
-                try:
-                    amount = float(tx.get('Amount', 0))
-                    monthly_totals[month] = monthly_totals.get(month, 0) + amount
-                except ValueError:
-                    pass
-        
-        # Get last 6 months
-        sorted_months = sorted(monthly_totals.keys())
-        recent_months = sorted_months[-6:] if len(sorted_months) > 6 else sorted_months
-        monthly_labels = [f"Month {month}" for month in recent_months]
-        monthly_values = [monthly_totals.get(month, 0) for month in recent_months]
+
         
         # Recent transactions
         recent_transactions = transactions[-10:] if len(transactions) > 10 else transactions
@@ -924,30 +908,7 @@ def stats():
             timeline_labels = ['1/1', '1/2', '1/3', '1/4', '1/5']
             timeline_values = [25.50, 45.20, 12.80, 67.90, 33.40]
         
-        # Budget progress data
-        limits_data = read_csv_data(LIMITS_FILE)
-        budget_labels = []
-        budget_values = []
-        budget_colors = ['#3bac72', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57']
-        
-        for i, limit in enumerate(limits_data):
-            try:
-                category = limit.get('Category')
-                limit_amount = float(limit.get('Limit', 0))
-                current_spending = get_monthly_spending(category)
-                
-                budget_labels.append(category)
-                budget_values.append(min(current_spending, limit_amount))  # Don't exceed limit in chart
-                budget_colors.append(budget_colors[i % len(budget_colors)])
-            except Exception as e:
-                print(f"Error processing budget limit {limit}: {e}")
-                continue
-        
-        # If no budget data, create sample data
-        if not budget_labels:
-            budget_labels = ['Food', 'Travel', 'Shopping']
-            budget_values = [450, 300, 200]
-            budget_colors = ['#3bac72', '#ff6b6b', '#4ecdc4']
+
         
         return render_template("stats.html",
                              total_spending=total_spending,
