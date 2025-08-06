@@ -242,14 +242,19 @@ def index():
 def transactions():
     try:
         transactions_list = read_csv_data(CSV_FILE)
-        # Ensure all transactions have required fields
+        # Ensure all transactions have required fields and convert amounts to float
         for tx in transactions_list:
             if 'Id' not in tx or not tx['Id']:
                 tx['Id'] = '0'
             if 'Name' not in tx:
                 tx['Name'] = ''
             if 'Amount' not in tx:
-                tx['Amount'] = '0'
+                tx['Amount'] = 0.0
+            else:
+                try:
+                    tx['Amount'] = float(tx['Amount'])
+                except (ValueError, TypeError):
+                    tx['Amount'] = 0.0
             if 'Date' not in tx:
                 tx['Date'] = ''
             if 'Category' not in tx:
