@@ -6,4 +6,5 @@ pytesseract==0.3.10
 opencv-python==4.8.1.78
 easyocr==1.7.0
 python-dateutil==2.9.0.post0
-pillow-heif==0.15.0 
+pillow-heif==0.15.0
+gunicorn==21.2.0 

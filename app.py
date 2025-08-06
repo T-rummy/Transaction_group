@@ -22,6 +22,14 @@ except ImportError:
     HEIC_SUPPORT = False
     print("Warning: pillow_heif not installed. HEIC files will not be supported.")
 
+# Global EasyOCR reader for faster processing
+try:
+    OCR_READER = easyocr.Reader(['en'], gpu=False, verbose=False)
+    print("EasyOCR reader initialized successfully")
+except Exception as e:
+    OCR_READER = None
+    print(f"Warning: Could not initialize EasyOCR reader: {e}")
+
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
@@ -103,25 +111,23 @@ def cleanup_temp_files():
 
 def preprocess_image(image_path):
     """
-    Preprocess the receipt image for better OCR results.
+    Fast preprocessing for receipt images.
     """
     try:
         # Read image
         image = cv2.imread(image_path)
         if image is None:
-            return None
+            return image_path
         
         # Convert to grayscale
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         
-        # Apply gentle noise reduction
-        denoised = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
-        
-        # Apply adaptive threshold for better text extraction
-        thresh = cv2.adaptiveThreshold(denoised, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+        # Simple contrast enhancement
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+        enhanced = clahe.apply(gray)
         
         # Save preprocessed image
-        cv2.imwrite(image_path, thresh)
+        cv2.imwrite(image_path, enhanced)
         return image_path
     except Exception as e:
         print(f"Error preprocessing image: {e}")
@@ -130,68 +136,56 @@ def preprocess_image(image_path):
 
 def extract_text_from_receipt(image_path):
     """
-    Extract text from receipt image using EasyOCR.
+    Fast text extraction from receipt image using EasyOCR.
     """
     try:
-        print(f"Starting OCR extraction for: {image_path}")
+        print(f"Starting fast OCR extraction for: {image_path}")
         
-        # Initialize EasyOCR reader with specific settings
-        reader = easyocr.Reader(['en'], gpu=False, verbose=False)
+        # Use global reader if available, otherwise create new one
+        reader = OCR_READER if OCR_READER else easyocr.Reader(['en'], gpu=False, verbose=False)
         
-        # Try multiple approaches with different settings
-        approaches = [
-            # Approach 1: Processed image with standard settings
-            {
-                'image': preprocess_image(image_path),
-                'height_ths': 0.5,
-                'width_ths': 0.5,
-                'name': 'processed_standard'
-            },
-            # Approach 2: Original image with lenient settings
-            {
-                'image': image_path,
-                'height_ths': 0.3,
-                'width_ths': 0.3,
-                'name': 'original_lenient'
-            },
-            # Approach 3: Original image with very lenient settings
-            {
-                'image': image_path,
-                'height_ths': 0.1,
-                'width_ths': 0.1,
-                'name': 'original_very_lenient'
-            }
-        ]
-        
-        for approach in approaches:
-            try:
-                print(f"Trying {approach['name']} approach...")
+        # Use original image first (fastest)
+        try:
+            results = reader.readtext(image_path, 
+                                     paragraph=False,
+                                     detail=0,
+                                     height_ths=0.3,
+                                     width_ths=0.3)
+            
+            # Extract text from results
+            text_lines = []
+            for text in results:
+                if text and text.strip():
+                    text_lines.append(text.strip())
+            
+            print(f"Fast OCR: Found {len(text_lines)} text lines")
+            if text_lines and len(text_lines) >= 3:  # If we got enough text, return it
+                return text_lines
                 
-                # Read text from image
-                results = reader.readtext(approach['image'], 
-                                         paragraph=False,
-                                         detail=0,
-                                         height_ths=approach['height_ths'],
-                                         width_ths=approach['width_ths'])
-                
-                # Extract text from results
-                text_lines = []
-                for text in results:
-                    if text and text.strip():
-                        text_lines.append(text.strip())
-                
-                print(f"  {approach['name']}: Found {len(text_lines)} text lines")
-                if text_lines:
-                    print(f"  Sample text: {text_lines[:2]}")
-                    return text_lines
-                else:
-                    print(f"  {approach['name']}: No text found")
-                    
-            except Exception as approach_error:
-                print(f"  {approach['name']} failed: {approach_error}")
-                continue
+        except Exception as e:
+            print(f"Fast OCR failed: {e}")
         
-        print("All OCR approaches failed")
+        # If fast approach failed, try with preprocessing (still much faster than before)
+        try:
+            processed_image = preprocess_image(image_path)
+            results = reader.readtext(processed_image, 
+                                     paragraph=False,
+                                     detail=0,
+                                     height_ths=0.2,
+                                     width_ths=0.2)
+            
+            text_lines = []
+            for text in results:
+                if text and text.strip():
+                    text_lines.append(text.strip())
+            
+            print(f"Processed OCR: Found {len(text_lines)} text lines")
+            return text_lines
+            
+        except Exception as e:
+            print(f"Processed OCR failed: {e}")
+        
+        print("OCR extraction failed")
         return []
         
     except Exception as e:
@@ -715,26 +709,13 @@ def scan_receipt():
                         os.remove(filepath)
                     return redirect(request.url)
             
-            # Extract text from receipt
+            # Extract text from receipt (now much faster)
+            print("Starting text extraction...")
             text_lines = extract_text_from_receipt(filepath)
             
-            if not text_lines:
-                flash('Could not extract text from receipt. Please try again with a clearer image.')
-                # Clean up the uploaded file
-                if os.path.exists(filepath):
-                    os.remove(filepath)
-                return redirect(request.url)
-            
             # Parse the extracted text
+            print("Parsing extracted text...")
             receipt_data = parse_receipt_data(text_lines)
-            
-            # Validate parsed data - be very lenient
-            if not receipt_data['name']:
-                receipt_data['name'] = 'Receipt Scan'  # Provide default name
-            
-            if receipt_data['amount'] <= 0:
-                flash('Could not extract amount from receipt. Please manually enter the amount on the next page.')
-                # Still proceed to confirmation page
             
             # Always proceed to confirmation, even with partial data
             print(f"Final parsed receipt data: {receipt_data}")
@@ -935,5 +916,6 @@ def stats():
                              recent_transactions=[])
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host="0.0.0.0", port=port, debug=False)
 
