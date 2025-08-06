@@ -154,6 +154,7 @@ body {
 .gap-4 { gap: var(--space-md); }
 .gap-6 { gap: var(--space-lg); }
 .gap-8 { gap: var(--space-xl); }
+.gap-12 { gap: calc(var(--space-xl) * 1.5); }
 
 .p-4 { padding: var(--space-md); }
 .p-6 { padding: var(--space-lg); }
@@ -174,6 +175,7 @@ body {
 .mb-6 { margin-bottom: var(--space-lg); }
 .mb-8 { margin-bottom: var(--space-xl); }
 .mb-12 { margin-bottom: var(--space-2xl); }
+.mb-16 { margin-bottom: calc(var(--space-2xl) * 2); }
 
 /* Navigation */
 .navbar {
@@ -281,6 +283,9 @@ body {
   padding: var(--space-3xl) 0;
   position: relative;
   overflow: hidden;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
 }
 
 .hero::before {
@@ -301,6 +306,7 @@ body {
   text-align: center;
   max-width: 800px;
   margin: 0 auto;
+  padding: 0 var(--space-lg);
 }
 
 .hero-title {
@@ -317,8 +323,9 @@ body {
 .hero-subtitle {
   font-size: clamp(1.125rem, 2vw, 1.5rem);
   color: var(--text-secondary);
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-2xl);
   font-weight: 400;
+  line-height: 1.6;
 }
 
 /* Card System */
@@ -330,6 +337,7 @@ body {
   transition: var(--transition-normal);
   position: relative;
   overflow: hidden;
+  margin-bottom: var(--space-lg);
 }
 
 .card::before {
@@ -815,19 +823,26 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
-    padding: 0 var(--space-sm);
+    padding: 0 var(--space-md);
   }
   
   .hero {
     padding: var(--space-2xl) 0;
+    min-height: 50vh;
+  }
+  
+  .hero-content {
+    padding: 0 var(--space-md);
   }
   
   .card {
     padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
   }
   
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: var(--space-md);
   }
   
   .table-container {
@@ -837,6 +852,15 @@ body {
   .modal {
     margin: var(--space-sm);
     padding: var(--space-lg);
+  }
+  
+  .btn-lg {
+    padding: var(--space-md) var(--space-lg);
+    font-size: 1rem;
+  }
+  
+  .grid {
+    gap: var(--space-lg);
   }
 }
 
