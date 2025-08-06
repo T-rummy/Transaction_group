@@ -92,6 +92,10 @@
             <div class="p-6">
                 <canvas id="timelineChart" width="400" height="300"
                         data-chart-data='{"labels": {{ timeline_labels|tojson }}, "values": {{ timeline_values|tojson }}}'></canvas>
+                <!-- Debug info -->
+                <div class="text-xs text-gray-500 mt-2">
+                    Debug: Labels: {{ timeline_labels|length }}, Values: {{ timeline_values|length }}
+                </div>
             </div>
         </div>
 
@@ -104,6 +108,10 @@
             <div class="p-6">
                 <canvas id="budgetChart" width="400" height="300"
                         data-chart-data='{"labels": {{ budget_labels|tojson }}, "values": {{ budget_values|tojson }}, "colors": {{ budget_colors|tojson }}}'></canvas>
+                <!-- Debug info -->
+                <div class="text-xs text-gray-500 mt-2">
+                    Debug: Labels: {{ budget_labels|length }}, Values: {{ budget_values|length }}, Colors: {{ budget_colors|length }}
+                </div>
             </div>
         </div>
     </div>

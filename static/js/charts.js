@@ -75,6 +75,13 @@ class BudgetCharts {
 
         const data = JSON.parse(ctx.dataset.chartData || '{}');
         console.log('Timeline chart data:', data);
+        console.log('Timeline labels:', data.labels);
+        console.log('Timeline values:', data.values);
+        
+        if (!data.labels || data.labels.length === 0) {
+            console.log('No timeline data available');
+            return;
+        }
         
         this.charts.timeline = new Chart(ctx, {
             type: 'line',
@@ -184,6 +191,13 @@ class BudgetCharts {
 
         const data = JSON.parse(ctx.dataset.chartData || '{}');
         console.log('Budget chart data:', data);
+        console.log('Budget labels:', data.labels);
+        console.log('Budget values:', data.values);
+        
+        if (!data.labels || data.labels.length === 0) {
+            console.log('No budget data available');
+            return;
+        }
         
         this.charts.budget = new Chart(ctx, {
             type: 'doughnut',
