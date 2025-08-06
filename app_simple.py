@@ -631,10 +631,124 @@ def add_test_transaction():
         ]
         write_csv_data(CSV_FILE, transactions, fieldnames)
         
-        flash("Test transaction added! Check achievements.")
+        # Check for new achievements (same as normal add transaction)
+        achievement_system = AchievementSystem()
+        limits_data = read_csv_data(LIMITS_FILE)
+        new_achievements = achievement_system.check_achievements(transactions, limits_data)
+        
+        if new_achievements:
+            achievement_names = [f"{a['icon']} {a['name']}" for a in new_achievements]
+            flash(f"Test transaction added! 🎉 New achievements unlocked: {', '.join(achievement_names)}")
+        else:
+            flash("Test transaction added! Check achievements.")
+        
         return redirect(url_for('test_achievements'))
     except Exception as e:
         flash(f"Error adding test transaction: {str(e)}")
+        return redirect(url_for('test_achievements'))
+
+@app.route('/dev/add_multiple_test_transactions', methods=['GET', 'POST'])
+def add_multiple_test_transactions():
+    """Developer route to add multiple test transactions for achievement testing."""
+    try:
+        # Read existing transactions
+        transactions = read_csv_data(CSV_FILE)
+        current_count = len(transactions)
+        
+        # Add multiple test transactions with different categories
+        test_transactions = [
+            {
+                'Id': f'999{i}',
+                'Name': f'Test Transaction {i+1}',
+                'Amount': '25.00',
+                'Date': date.today().strftime("%m/%d/%Y"),
+                'Category': 'Food'
+            },
+            {
+                'Id': f'998{i}',
+                'Name': f'Test Travel {i+1}',
+                'Amount': '50.00',
+                'Date': date.today().strftime("%m/%d/%Y"),
+                'Category': 'Travel'
+            },
+            {
+                'Id': f'997{i}',
+                'Name': f'Test Academic {i+1}',
+                'Amount': '30.00',
+                'Date': date.today().strftime("%m/%d/%Y"),
+                'Category': 'Academic'
+            },
+            {
+                'Id': f'996{i}',
+                'Name': f'Test Health {i+1}',
+                'Amount': '40.00',
+                'Date': date.today().strftime("%m/%d/%Y"),
+                'Category': 'Health'
+            },
+            {
+                'Id': f'995{i}',
+                'Name': f'Test Bills {i+1}',
+                'Amount': '100.00',
+                'Date': date.today().strftime("%m/%d/%Y"),
+                'Category': 'Bills & Utilities'
+            }
+        ]
+        
+        # Add all test transactions
+        for tx in test_transactions:
+            transactions.append(tx)
+        
+        # Write back to CSV
+        fieldnames = [
+            "Id", "Name", "Amount", "Date", "Category",
+            "Subcategory", "Location", "Destination", "Transport_Mode",
+            "Transport_Type", "Bill_Type", "Provider",
+            "Academic_Type", "Institution", "Health_Type"
+        ]
+        write_csv_data(CSV_FILE, transactions, fieldnames)
+        
+        # Check for new achievements
+        achievement_system = AchievementSystem()
+        limits_data = read_csv_data(LIMITS_FILE)
+        new_achievements = achievement_system.check_achievements(transactions, limits_data)
+        
+        added_count = len(test_transactions)
+        if new_achievements:
+            achievement_names = [f"{a['icon']} {a['name']}" for a in new_achievements]
+            flash(f"Added {added_count} test transactions! 🎉 New achievements unlocked: {', '.join(achievement_names)}")
+        else:
+            flash(f"Added {added_count} test transactions! Check achievements.")
+        
+        return redirect(url_for('test_achievements'))
+    except Exception as e:
+        flash(f"Error adding test transactions: {str(e)}")
+        return redirect(url_for('test_achievements'))
+
+@app.route('/dev/clear_test_transactions', methods=['GET', 'POST'])
+def clear_test_transactions():
+    """Developer route to remove test transactions (IDs starting with 99)."""
+    try:
+        # Read existing transactions
+        transactions = read_csv_data(CSV_FILE)
+        
+        # Filter out test transactions (IDs starting with 99)
+        original_count = len(transactions)
+        transactions = [tx for tx in transactions if not str(tx.get('Id', '')).startswith('99')]
+        removed_count = original_count - len(transactions)
+        
+        # Write back to CSV
+        fieldnames = [
+            "Id", "Name", "Amount", "Date", "Category",
+            "Subcategory", "Location", "Destination", "Transport_Mode",
+            "Transport_Type", "Bill_Type", "Provider",
+            "Academic_Type", "Institution", "Health_Type"
+        ]
+        write_csv_data(CSV_FILE, transactions, fieldnames)
+        
+        flash(f"Removed {removed_count} test transactions! Your real data is preserved.")
+        return redirect(url_for('test_achievements'))
+    except Exception as e:
+        flash(f"Error clearing test transactions: {str(e)}")
         return redirect(url_for('test_achievements'))
 
 @app.route('/achievements')
