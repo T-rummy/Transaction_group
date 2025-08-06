@@ -1,1 +1,2 @@
-category,amount
+Category,Limit,Alert_Threshold
+Food,100.0,50

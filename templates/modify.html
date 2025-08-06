@@ -1,63 +1,89 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="max-w-3xl mx-auto">
-    <h2 class="text-2xl font-semibold mb-6">Modify Transaction</h2>
+<div class="fade-in" style="max-width: 1000px; margin: 0 auto;">
+    <div class="text-center" style="margin-bottom: 32px;">
+        <h1 class="text-3xl font-bold text-primary" style="margin-bottom: 8px;">Modify Transactions</h1>
+        <p class="text-secondary">Update transaction details as needed</p>
+    </div>
 
-    <!-- Search Transaction -->
-    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 mb-6">
-        <form method="POST" action="/modify" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Transaction ID</label>
-                <input type="text" name="transaction_id" class="w-full p-2 rounded border border-gray-300 focus:ring-2 focus:ring-blue-200" placeholder="Enter transaction ID to modify" required>
+    <!-- Modify Form -->
+    <div class="card" style="padding: 32px; margin-bottom: 32px;">
+        <h2 class="text-xl font-semibold text-primary" style="margin-bottom: 24px;">Update Transaction</h2>
+        <form method="POST" action="/modify" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3" style="gap: 20px;">
+                <div class="form-group">
+                    <label class="form-label">Transaction ID</label>
+                    <input type="text" name="transaction_id" class="form-input" 
+                           placeholder="Enter transaction ID" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Field to Update</label>
+                    <select name="field" class="form-select">
+                        <option value="Name">Name</option>
+                        <option value="Amount">Amount</option>
+                        <option value="Category">Category</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">New Value</label>
+                    <input type="text" name="new_value" class="form-input" 
+                           placeholder="Enter new value" required>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Field to Update</label>
-                <select name="field" class="w-full p-2 rounded border border-gray-300 focus:ring-2 focus:ring-blue-200">
-                    <option value="Name">Name</option>
-                    <option value="Amount">Amount</option>
-                    <option value="Category">Category</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700">New Value</label>
-                <input type="text" name="new_value" class="w-full p-2 rounded border border-gray-300 focus:ring-2 focus:ring-blue-200" placeholder="Enter new value" required>
-            </div>
-
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-medium transition">
+            <button type="submit" class="btn btn-primary w-full">
                 Update Transaction
             </button>
         </form>
     </div>
 
-    <!-- Transaction Table -->
-    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-        <h3 class="text-lg font-semibold mb-4">Existing Transactions</h3>
-        <div class="overflow-x-auto">
-            <table class="min-w-full border-collapse">
-                <thead>
-                    <tr class="bg-gray-50 border-b">
-                        <th class="px-4 py-2 text-left text-sm font-semibold">ID</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold">Name</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold">Category</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold">Amount</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold">Date</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    {% for transaction in transactions %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-2">{{ transaction['Id'] }}</td>
-                        <td class="px-4 py-2">{{ transaction['Name'] }}</td>
-                        <td class="px-4 py-2">{{ transaction['Category'] }}</td>
-                        <td class="px-4 py-2">${{ transaction['Amount'] }}</td>
-                        <td class="px-4 py-2">{{ transaction['Date'] }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <!-- Transaction List -->
+    <div class="card" style="padding: 32px;">
+        <h2 class="text-xl font-semibold text-primary" style="margin-bottom: 24px;">All Transactions</h2>
+        
+        {% if transactions %}
+            <div class="overflow-x-auto">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <th style="text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-secondary); font-size: 14px;">ID</th>
+                            <th style="text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-secondary); font-size: 14px;">Name</th>
+                            <th style="text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-secondary); font-size: 14px;">Category</th>
+                            <th style="text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-secondary); font-size: 14px;">Amount</th>
+                            <th style="text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-secondary); font-size: 14px;">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s ease;">
+                            <td style="padding: 12px 16px; font-weight: 500; color: var(--text-primary);">{{ transaction['Id'] }}</td>
+                            <td style="padding: 12px 16px; color: var(--text-primary);">{{ transaction['Name'] }}</td>
+                            <td style="padding: 12px 16px;">
+                                <span class="transaction-category">{{ transaction['Category'] }}</span>
+                            </td>
+                            <td style="padding: 12px 16px; font-weight: 600; color: var(--text-primary);">${{ "%.2f"|format(transaction['Amount']|float) }}</td>
+                            <td style="padding: 12px 16px; color: var(--text-secondary);">{{ transaction['Date'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center" style="padding: 48px 24px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+                <h3 class="text-lg font-semibold text-primary" style="margin-bottom: 8px;">No Transactions Found</h3>
+                <p class="text-secondary">Add some transactions first to modify them.</p>
+            </div>
+        {% endif %}
     </div>
 </div>
+
+<style>
+    tbody tr:hover {
+        background-color: rgba(0, 122, 255, 0.05);
+    }
+</style>
 {% endblock %}

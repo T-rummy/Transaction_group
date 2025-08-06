@@ -3,53 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title or "Transaction Tracker" }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{ title or "ExpenseTrack" }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-50 text-gray-800">
-
-<!-- Navbar -->
-<nav class="bg-white border-b border-gray-200 shadow-sm p-4 sticky top-0 z-10">
-    <div class="flex justify-between items-center">
-        <div class="flex items-center space-x-4">
-            <a class="text-lg font-bold text-blue-600" href="{{ url_for('index') }}">💳 ExpenseTrack</a>
+<body>
+    <!-- Modern Navigation -->
+    <nav class="navbar">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+            <div class="flex justify-between items-center" style="height: 60px;">
+                <div class="flex items-center">
+                    <a href="{{ url_for('index') }}" class="nav-link" style="font-size: 20px; font-weight: 700; color: var(--primary-color);">
+                        💳 ExpenseTrack
+                    </a>
+                </div>
+                
+                <div class="hidden md:flex" style="gap: 48px;">
+                    <a href="/" class="nav-link {{ 'active' if request.endpoint == 'index' else '' }}">Add</a>
+                    <a href="/transactions" class="nav-link {{ 'active' if request.endpoint == 'transactions' else '' }}">Transactions</a>
+                    <a href="/set_limits" class="nav-link {{ 'active' if request.endpoint == 'set_limit' else '' }}">Limits</a>
+                    <a href="/limits" class="nav-link {{ 'active' if request.endpoint == 'limits' else '' }}">View Limits</a>
+                    <a href="/modify" class="nav-link {{ 'active' if request.endpoint == 'modify' else '' }}">Modify</a>
+                    <a href="/stats" class="nav-link {{ 'active' if request.endpoint == 'stats' else '' }}">Analytics</a>
+                </div>
+                
+                <div class="flex items-center">
+                    <button id="menu-btn" class="md:hidden btn btn-outline" style="padding: 8px 12px;">
+                        ☰
+                    </button>
+                </div>
+            </div>
             
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden" style="padding: 16px 0; border-top: 1px solid var(--border-color);">
+                <div class="flex flex-col" style="gap: 12px;">
+                    <a href="/" class="nav-link">Add Transaction</a>
+                    <a href="/transactions" class="nav-link">All Transactions</a>
+                    <a href="/set_limits" class="nav-link">Set Limits</a>
+                    <a href="/limits" class="nav-link">View Limits</a>
+                    <a href="/modify" class="nav-link">Modify</a>
+                    <a href="/stats" class="nav-link">Analytics</a>
+                </div>
+            </div>
         </div>
-        <div class="hidden md:flex space-x-6">
-            <a href="/" class="text-gray-600 hover:text-blue-600">Add</a>
-            <a href="/transactions" class="text-gray-600 hover:text-blue-600">All Expenses</a>
-            <a href="/set_limits" class="text-gray-600 hover:text-blue-600">Set Limits</a>
-            <a href="/limits" class="text-gray-600 hover:text-blue-600">Limits</a>
-            <a href="/modify" class="text-gray-600 hover:text-blue-600">Modify</a>
-            <a href="/stats" class="text-gray-600 hover:text-blue-600">Analytics</a>
-        </div>
-        <div class="flex items-center space-x-3">
-            <span class="text-gray-500 text-sm hidden md:inline">Welcome, User</span>
-            <button id="menu-btn" class="md:hidden text-gray-600 focus:outline-none">
-                ☰
-            </button>
-        </div>
-    </div>
-    <div id="mobile-menu" class="hidden flex-col space-y-2 mt-2 md:hidden">
-        <a href="/" class="block text-gray-600 hover:text-blue-600">Add</a>
-        <a href="/transactions" class="block text-gray-600 hover:text-blue-600">All Expenses</a>
-        <a href="/limits" class="block text-gray-600 hover:text-blue-600">Set Limits</a>
-        <a href="/modify" class="block text-gray-600 hover:text-blue-600">Modify</a>
-        <a href="/stats" class="block text-gray-600 hover:text-blue-600">Analytics</a>
-    </div>
-</nav>
+    </nav>
 
-<!-- Content -->
-<main class="p-6">
-    {% block content %}{% endblock %}
-</main>
+    <!-- Main Content -->
+    <main style="min-height: calc(100vh - 60px); padding: 32px 20px;">
+        <div class="container" style="max-width: 1200px; margin: 0 auto;">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="space-y-2">
+                        {% for message in messages %}
+                            <div class="flash-message flash-success fade-in">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <!-- Spending Alerts -->
+            <div id="spending-alerts" class="space-y-3" style="margin-bottom: 24px;">
+                <!-- Alerts will be loaded here -->
+            </div>
+            
+            <!-- Page Content -->
+            {% block content %}{% endblock %}
+        </div>
+    </main>
 
-<script>
-    document.getElementById('menu-btn').addEventListener('click', () => {
-        document.getElementById('mobile-menu').classList.toggle('hidden');
-    });
-</script>
+    <script>
+        // Mobile menu toggle
+        document.getElementById('menu-btn').addEventListener('click', () => {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Add fade-in animation to all cards
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card, .transaction-card, .stats-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.classList.add('fade-in');
+            });
+            
+            // Load spending alerts
+            loadSpendingAlerts();
+        });
+
+        // Load and display spending alerts
+        function loadSpendingAlerts() {
+            fetch('/get_alerts')
+                .then(response => response.json())
+                .then(alerts => {
+                    const alertsContainer = document.getElementById('spending-alerts');
+                    alertsContainer.innerHTML = '';
+                    
+                    alerts.forEach(alert => {
+                        const alertElement = createAlertElement(alert);
+                        alertsContainer.appendChild(alertElement);
+                    });
+                })
+                .catch(error => console.error('Error loading alerts:', error));
+        }
+
+        // Create alert element
+        function createAlertElement(alert) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'spending-alert fade-in';
+            alertDiv.style.cssText = `
+                background: linear-gradient(135deg, #FF3B30, #FF6B6B);
+                color: white;
+                padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0 8px 24px rgba(255, 59, 48, 0.3);
+                border: 2px solid #FF3B30;
+                position: relative;
+                animation: pulse 2s infinite;
+            `;
+            
+            alertDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700;">
+                            🚨 SPENDING ALERT 🚨
+                        </h3>
+                        <div style="font-size: 14px; line-height: 1.5;">
+                            <div><strong>Category:</strong> ${alert.category}</div>
+                            <div><strong>Current Spending:</strong> $${alert.current_spending.toFixed(2)}</div>
+                            <div><strong>Limit:</strong> $${alert.limit.toFixed(2)}</div>
+                            <div><strong>Threshold:</strong> ${alert.threshold_percentage}%</div>
+                        </div>
+                        <div style="margin-top: 12px; font-weight: 600;">
+                            You've reached ${alert.threshold_percentage}% of your ${alert.category} spending limit!
+                        </div>
+                    </div>
+                    <button onclick="dismissAlert('${alert.key}')" 
+                            style="background: rgba(255, 255, 255, 0.2); border: none; color: white; 
+                                   padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
+                                   transition: background 0.2s ease;">
+                        Dismiss
+                    </button>
+                </div>
+            `;
+            
+            return alertDiv;
+        }
+
+        // Dismiss alert
+        function dismissAlert(alertKey) {
+            fetch(`/dismiss_alert/${alertKey}`)
+                .then(() => {
+                    loadSpendingAlerts(); // Reload alerts
+                })
+                .catch(error => console.error('Error dismissing alert:', error));
+        }
+
+        // Auto-refresh alerts every 30 seconds
+        setInterval(loadSpendingAlerts, 30000);
+    </script>
+
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .spending-alert {
+            transition: all 0.3s ease;
+        }
+        
+        .spending-alert:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(255, 59, 48, 0.4);
+        }
+    </style>
 </body>
 </html>

@@ -3,31 +3,89 @@
 {% block title %}Add Transaction{% endblock %}
 
 {% block content %}
-<h1>Add Transaction</h1>
-<form method="POST">
-    <label for="name">Name:</label>
-    <input type="text" name="name" required>
+<div class="fade-in" style="max-width: 600px; margin: 0 auto;">
+    <div class="text-center" style="margin-bottom: 32px;">
+        <h1 class="text-3xl font-bold text-primary" style="margin-bottom: 8px;">Add Transaction</h1>
+        <p class="text-secondary">Track your expenses with ease</p>
+    </div>
+    
+    <div class="card" style="padding: 32px;">
+        <form action="/add" method="POST" class="space-y-6">
+            <div class="form-group">
+                <label class="form-label">Transaction Name</label>
+                <input type="text" name="name" class="form-input" placeholder="e.g., Coffee at Starbucks" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Amount ($)</label>
+                <input type="number" step="0.01" name="amount" class="form-input" placeholder="0.00" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select name="category" id="category" class="form-select">
+                    <option value="Food">Food & Dining</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Bills & Utilities">Bills & Utilities</option>
+                    <option value="Academic">Academic</option>
+                    <option value="Health">Health & Wellness</option>
+                </select>
+            </div>
+            
+            <div id="extra-fields" class="space-y-4"></div>
+            
+            <button type="submit" class="btn btn-primary w-full" style="margin-top: 24px;">
+                Add Transaction
+            </button>
+        </form>
+    </div>
+</div>
 
-    <label for="amount">Amount:</label>
-    <input type="number" step="0.01" name="amount" required>
-
-    <label for="category">Category:</label>
-    <select name="category" required>
-        <option value="Food">Food</option>
-        <option value="Travel">Travel</option>
-        <option value="Transportation">Transportation</option>
-        <option value="Bills/Utilities">Bills/Utilities</option>
-        <option value="Academic">Academic</option>
-        <option value="Health">Health</option>
-    </select>
-
-    <label for="extra1">Extra 1:</label>
-    <input type="text" name="extra1">
-
-    <label for="extra2">Extra 2:</label>
-    <input type="text" name="extra2">
-
-    <button type="submit">Add</button>
-</form>
-
+<script>
+document.getElementById('category').addEventListener('change', function() {
+    const category = this.value;
+    const extraFields = document.getElementById('extra-fields');
+    extraFields.innerHTML = '';
+    
+    const fields = {
+        'Food': [
+            { name: 'extra1', label: 'Restaurant/Location', placeholder: 'e.g., McDonald\'s' },
+            { name: 'extra2', label: 'Meal Type', placeholder: 'e.g., Lunch, Dinner' }
+        ],
+        'Travel': [
+            { name: 'extra1', label: 'Destination', placeholder: 'e.g., New York' },
+            { name: 'extra2', label: 'Travel Type', placeholder: 'e.g., Business, Leisure' }
+        ],
+        'Transportation': [
+            { name: 'extra1', label: 'Transport Mode', placeholder: 'e.g., Uber, Bus' },
+            { name: 'extra2', label: 'Route', placeholder: 'e.g., Home to Work' }
+        ],
+        'Bills & Utilities': [
+            { name: 'extra1', label: 'Bill Type', placeholder: 'e.g., Electricity, Internet' },
+            { name: 'extra2', label: 'Provider', placeholder: 'e.g., Comcast, PG&E' }
+        ],
+        'Academic': [
+            { name: 'extra1', label: 'Academic Type', placeholder: 'e.g., Books, Tuition' },
+            { name: 'extra2', label: 'Institution', placeholder: 'e.g., Stanford University' }
+        ],
+        'Health': [
+            { name: 'extra1', label: 'Health Type', placeholder: 'e.g., Doctor Visit, Medicine' },
+            { name: 'extra2', label: 'Provider', placeholder: 'e.g., CVS Pharmacy' }
+        ]
+    };
+    
+    if (fields[category]) {
+        fields[category].forEach(field => {
+            const div = document.createElement('div');
+            div.className = 'form-group';
+            div.innerHTML = `
+                <label class="form-label">${field.label}</label>
+                <input type="text" name="${field.name}" class="form-input" placeholder="${field.placeholder}">
+            `;
+            extraFields.appendChild(div);
+        });
+    }
+});
+</script>
 {% endblock %}

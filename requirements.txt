@@ -1,0 +1,5 @@
+Flask==2.3.3
+pandas==2.0.3
+requests==2.31.0
+# For SMS functionality (uncomment when ready to use Twilio):
+# twilio==8.10.0 
