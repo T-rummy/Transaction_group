@@ -791,17 +791,7 @@ def achievements():
                              unlocked_count=0,
                              total_achievements=0)
 
-@app.route('/scan_receipt', methods=['GET', 'POST'])
-def scan_receipt():
-    """Receipt scanning placeholder - redirects to manual entry."""
-    flash('Receipt scanning is not available in the deployed version. Please use manual entry.')
-    return redirect('/add')
 
-@app.route('/confirm_receipt', methods=['GET', 'POST'])
-def confirm_receipt():
-    """Receipt confirmation placeholder."""
-    flash('Receipt scanning is not available in the deployed version. Please use manual entry.')
-    return redirect('/add')
 
 # Stats Page
 @app.route('/stats')

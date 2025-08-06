@@ -105,8 +105,8 @@ python/
 └── templates/
     ├── base.html         # Base template
     ├── index.html        # Add transaction page
-    ├── scan_receipt.html # Receipt scanning page
-    ├── confirm_receipt.html # Receipt confirmation
+    
+    
     ├── transactions.html # View all transactions
     ├── limits.html       # View spending limits
     ├── set_limits.html   # Set spending limits

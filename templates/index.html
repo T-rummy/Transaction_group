@@ -7,11 +7,11 @@
         <h1 class="hero-title">Smart Expense Tracking</h1>
         <p class="hero-subtitle">Track your spending, set limits, and stay on budget with intelligent insights</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="{{ url_for('scan_receipt') }}" class="btn btn-primary btn-lg">
-                📷 Scan Receipt
-            </a>
-            <a href="{{ url_for('transactions') }}" class="btn btn-secondary btn-lg">
+            <a href="{{ url_for('transactions') }}" class="btn btn-primary btn-lg">
                 📊 View Transactions
+            </a>
+            <a href="{{ url_for('add_transaction') }}" class="btn btn-secondary btn-lg">
+                📝 Add Transaction
             </a>
         </div>
     </div>
@@ -76,22 +76,7 @@
             </form>
         </div>
 
-        <div class="card text-center">
-            <div class="card-header">
-                <h3 class="card-title">📷 Scan Receipt</h3>
-                <p class="card-subtitle">AI-powered receipt scanning</p>
-            </div>
-            <div class="space-y-4">
-                <div class="p-6 bg-gradient-to-br from-primary-glow to-secondary-glow rounded-xl">
-                    <div class="text-4xl mb-4">📱</div>
-                    <h4 class="font-semibold mb-2">Smart OCR Technology</h4>
-                    <p class="text-sm text-secondary">Take a photo of any receipt and let AI extract the details automatically</p>
-                </div>
-                <a href="{{ url_for('scan_receipt') }}" class="btn btn-primary w-full">
-                    Start Scanning
-                </a>
-            </div>
-        </div>
+
 
         <div class="card text-center">
             <div class="card-header">
@@ -189,8 +174,8 @@
                 <div class="text-6xl mb-4">📝</div>
                 <h4 class="text-xl font-semibold mb-2">No transactions yet</h4>
                 <p class="text-secondary mb-6">Start tracking your expenses by adding your first transaction</p>
-                <a href="{{ url_for('scan_receipt') }}" class="btn btn-primary">
-                    📷 Scan Your First Receipt
+                <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">
+                    📝 Add Your First Transaction
                 </a>
             </div>
         {% endif %}
