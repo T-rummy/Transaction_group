@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Achievements - Budget Buddy{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-primary mb-4">🏆 Achievements</h1>
+        <p class="text-secondary text-lg">Track your progress and unlock badges as you master your finances!</p>
+    </div>
+
+    <!-- Progress Overview -->
+    <div class="card mb-8">
+        <div class="text-center">
+            <div class="text-6xl mb-4">🎯</div>
+            <h2 class="text-2xl font-bold text-primary mb-2">Your Progress</h2>
+            <div class="text-4xl font-bold text-primary mb-4">{{ unlocked_count }}/{{ total_achievements }}</div>
+            
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-200 rounded-full h-4 mb-4">
+                <div class="bg-gradient-to-r from-primary to-secondary h-4 rounded-full transition-all duration-1000 ease-out" 
+                     style="width: {{ progress_percentage }}%"></div>
+            </div>
+            
+            <div class="text-secondary">{{ "%.1f"|format(progress_percentage) }}% Complete</div>
+        </div>
+    </div>
+
+    <!-- Achievement Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for achievement_id, achievement in all_achievements.items() %}
+            {% set is_unlocked = achievement_id in unlocked_achievements|map(attribute='id')|list %}
+            <div class="achievement-card {% if is_unlocked %}unlocked{% else %}locked{% endif %}" 
+                 data-achievement-id="{{ achievement_id }}">
+                <div class="achievement-icon text-6xl mb-4 {% if not is_unlocked %}grayscale opacity-50{% endif %}">
+                    {{ achievement.icon }}
+                </div>
+                <h3 class="text-xl font-bold text-primary mb-2">{{ achievement.name }}</h3>
+                <p class="text-secondary text-center">{{ achievement.description }}</p>
+                
+                {% if is_unlocked %}
+                    <div class="achievement-badge mt-4">
+                        <span class="bg-gradient-to-r from-primary to-secondary text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            ✅ Unlocked
+                        </span>
+                    </div>
+                {% else %}
+                    <div class="achievement-badge mt-4">
+                        <span class="bg-gray-300 text-gray-600 px-3 py-1 rounded-full text-sm font-semibold">
+                            🔒 Locked
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Recent Unlocks -->
+    {% if unlocked_achievements %}
+    <div class="mt-12">
+        <h2 class="text-2xl font-bold text-primary mb-6 text-center">Recently Unlocked</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for achievement in unlocked_achievements[-3:] %}
+            <div class="card achievement-recent">
+                <div class="text-center">
+                    <div class="text-4xl mb-2">{{ achievement.icon }}</div>
+                    <h3 class="font-bold text-primary">{{ achievement.name }}</h3>
+                    <p class="text-sm text-secondary">{{ achievement.description }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Confetti Container -->
+<div id="confetti-container" class="fixed inset-0 pointer-events-none z-50"></div>
+
+<style>
+.achievement-card {
+    @apply card text-center transition-all duration-300 hover:scale-105;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.achievement-card.unlocked {
+    @apply border-primary;
+    box-shadow: 0 0 20px rgba(59, 172, 114, 0.3);
+}
+
+.achievement-card.locked {
+    @apply border-gray-300;
+}
+
+.achievement-card:hover {
+    transform: translateY(-5px);
+}
+
+.achievement-recent {
+    @apply border-primary;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+/* Confetti styles */
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--primary);
+    animation: confetti-fall 3s linear forwards;
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+</style>
+
+<script>
+// Confetti animation function
+function createConfetti() {
+    const container = document.getElementById('confetti-container');
+    const colors = ['#3bac72', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+    
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        container.appendChild(confetti);
+        
+        // Remove confetti after animation
+        setTimeout(() => {
+            confetti.remove();
+        }, 5000);
+    }
+}
+
+// Check for new achievements and trigger confetti
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if there are any newly unlocked achievements
+    const unlockedCards = document.querySelectorAll('.achievement-card.unlocked');
+    if (unlockedCards.length > 0) {
+        // Small delay to ensure page is loaded
+        setTimeout(() => {
+            createConfetti();
+        }, 1000);
+    }
+});
+
+// Add click animation to achievement cards
+document.querySelectorAll('.achievement-card').forEach(card => {
+    card.addEventListener('click', function() {
+        if (this.classList.contains('unlocked')) {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 150);
+        }
+    });
+});
+</script>
+{% endblock %} 

@@ -27,6 +27,7 @@
                 <li><a href="{{ url_for('index') }}" class="nav-link {{ 'active' if request.endpoint == 'index' }}">Add Transaction</a></li>
                 <li><a href="{{ url_for('transactions') }}" class="nav-link {{ 'active' if request.endpoint == 'transactions' }}">Transactions</a></li>
                 <li><a href="{{ url_for('stats') }}" class="nav-link {{ 'active' if request.endpoint == 'stats' }}">Analytics</a></li>
+                <li><a href="{{ url_for('achievements') }}" class="nav-link {{ 'active' if request.endpoint == 'achievements' }}">🏆 Achievements</a></li>
                 <li><a href="{{ url_for('limits') }}" class="nav-link {{ 'active' if request.endpoint == 'limits' }}">Limits</a></li>
                 <li><a href="{{ url_for('scan_receipt') }}" class="nav-link {{ 'active' if request.endpoint == 'scan_receipt' }}">Scan Receipt</a></li>
             </ul>

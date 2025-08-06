@@ -4,6 +4,7 @@ import os
 import json
 from datetime import date
 from Transaction_pt2 import Transaction, FoodTransaction, TravelTransaction, TransportationTransaction, BillsUtilitiesTransaction, AcademicTransaction, HealthTransaction
+from achievements import AchievementSystem
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -305,8 +306,18 @@ def add_transaction():
 
         # Check if this transaction triggers a spending limit alert
         check_spending_limits(category, amount)
+        
+        # Check for new achievements
+        achievement_system = AchievementSystem()
+        limits_data = read_csv_data(LIMITS_FILE)
+        new_achievements = achievement_system.check_achievements(transactions, limits_data)
+        
+        if new_achievements:
+            achievement_names = [f"{a['icon']} {a['name']}" for a in new_achievements]
+            flash(f"Transaction added successfully! 🎉 New achievements unlocked: {', '.join(achievement_names)}")
+        else:
+            flash("Transaction added successfully!")
 
-        flash("Transaction added successfully!")
         return redirect('/transactions')
 
     return render_template("add.html")
@@ -513,6 +524,34 @@ def clear_all_alerts():
     except Exception as e:
         flash(f"Error clearing alerts: {str(e)}")
         return redirect(url_for('index'))
+
+@app.route('/achievements')
+def achievements():
+    """Achievements page showing user progress and unlocked badges."""
+    try:
+        achievement_system = AchievementSystem()
+        all_achievements = achievement_system.get_all_achievements()
+        unlocked_achievements = achievement_system.get_unlocked_achievements()
+        
+        # Calculate progress
+        total_achievements = len(all_achievements)
+        unlocked_count = len(unlocked_achievements)
+        progress_percentage = (unlocked_count / total_achievements) * 100 if total_achievements > 0 else 0
+        
+        return render_template('achievements.html', 
+                             all_achievements=all_achievements,
+                             unlocked_achievements=unlocked_achievements,
+                             progress_percentage=progress_percentage,
+                             unlocked_count=unlocked_count,
+                             total_achievements=total_achievements)
+    except Exception as e:
+        print(f"Error loading achievements: {e}")
+        return render_template('achievements.html', 
+                             all_achievements={},
+                             unlocked_achievements=[],
+                             progress_percentage=0,
+                             unlocked_count=0,
+                             total_achievements=0)
 
 @app.route('/scan_receipt', methods=['GET', 'POST'])
 def scan_receipt():
