@@ -284,15 +284,91 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if Chart.js is loaded
     if (typeof Chart === 'undefined') {
         console.error('Chart.js is not loaded!');
+        document.getElementById('timeline-debug').innerHTML = 'ERROR: Chart.js not loaded!';
+        document.getElementById('budget-debug').innerHTML = 'ERROR: Chart.js not loaded!';
         return;
     }
     
     console.log('Chart.js is loaded, version:', Chart.version);
     
+    // Test Chart.js functionality
+    try {
+        const testCanvas = document.createElement('canvas');
+        const testChart = new Chart(testCanvas, {
+            type: 'line',
+            data: { labels: ['Test'], datasets: [{ data: [1] }] }
+        });
+        console.log('Chart.js test successful');
+        testChart.destroy();
+    } catch (error) {
+        console.error('Chart.js test failed:', error);
+        document.getElementById('timeline-debug').innerHTML = 'ERROR: Chart.js test failed - ' + error.message;
+        document.getElementById('budget-debug').innerHTML = 'ERROR: Chart.js test failed - ' + error.message;
+        return;
+    }
+    
     const budgetCharts = new BudgetCharts();
     budgetCharts.initCharts();
     
     console.log('Charts initialized:', Object.keys(budgetCharts.charts));
+    
+    // Fallback: Create simple charts if the class method failed
+    setTimeout(() => {
+        if (!budgetCharts.charts.timeline) {
+            console.log('Creating fallback timeline chart...');
+            const timelineCtx = document.getElementById('timelineChart');
+            if (timelineCtx) {
+                const data = JSON.parse(timelineCtx.dataset.chartData || '{}');
+                if (data.labels && data.values) {
+                    new Chart(timelineCtx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Daily Spending',
+                                data: data.values,
+                                borderColor: '#3bac72',
+                                backgroundColor: 'rgba(59, 172, 114, 0.1)',
+                                borderWidth: 2,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                    document.getElementById('timeline-debug').innerHTML = 'Fallback timeline chart created!';
+                }
+            }
+        }
+        
+        if (!budgetCharts.charts.budget) {
+            console.log('Creating fallback budget chart...');
+            const budgetCtx = document.getElementById('budgetChart');
+            if (budgetCtx) {
+                const data = JSON.parse(budgetCtx.dataset.chartData || '{}');
+                if (data.labels && data.values) {
+                    new Chart(budgetCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                data: data.values,
+                                backgroundColor: data.colors || ['#3bac72', '#ff6b6b', '#4ecdc4'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                    document.getElementById('budget-debug').innerHTML = 'Fallback budget chart created!';
+                }
+            }
+        }
+    }, 1000);
     
     // Add entrance animations
     setTimeout(() => {
