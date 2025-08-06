@@ -6,6 +6,8 @@ import time
 from datetime import date
 from Transaction_pt2 import Transaction, FoodTransaction, TravelTransaction, TransportationTransaction, BillsUtilitiesTransaction, AcademicTransaction, HealthTransaction
 from werkzeug.utils import secure_filename
+from PIL import Image
+import pillow_heif
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -83,6 +85,26 @@ def create_spending_alert(category, current_spending, limit, threshold_percentag
         return False
     except Exception as e:
         print(f"Error creating spending alert: {e}")
+        return False
+
+def convert_heic_to_jpg(heic_path, jpg_path):
+    """Convert HEIC image to JPG format."""
+    try:
+        # Register HEIF opener with Pillow
+        pillow_heif.register_heif_opener()
+        
+        # Open HEIC image
+        with Image.open(heic_path) as img:
+            # Convert to RGB if necessary
+            if img.mode in ('RGBA', 'LA', 'P'):
+                img = img.convert('RGB')
+            
+            # Save as JPG
+            img.save(jpg_path, 'JPEG', quality=95)
+        
+        return True
+    except Exception as e:
+        print(f"Error converting HEIC to JPG: {e}")
         return False
 
 def check_spending_limits(category, new_amount):
@@ -269,7 +291,22 @@ def upload_receipt():
                     filename = f"{timestamp}_{filename}"
                     filepath = os.path.join(upload_folder, filename)
                     file.save(filepath)
-                    receipt_image = filename
+                    
+                    # Check if it's a HEIC file and convert to JPG
+                    file_extension = filename.lower().split('.')[-1]
+                    if file_extension in ['heic', 'heif']:
+                        jpg_filename = f"{timestamp}_{filename.rsplit('.', 1)[0]}.jpg"
+                        jpg_filepath = os.path.join(upload_folder, jpg_filename)
+                        
+                        if convert_heic_to_jpg(filepath, jpg_filepath):
+                            # Remove original HEIC file
+                            os.remove(filepath)
+                            receipt_image = jpg_filename
+                        else:
+                            # If conversion fails, keep original file
+                            receipt_image = filename
+                    else:
+                        receipt_image = filename
             
             # Create transaction
             transaction = Transaction(name, amount, date_str, category)

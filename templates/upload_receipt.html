@@ -14,7 +14,7 @@
                 <label class="form-label">Upload Receipt Image</label>
                 <input type="file" name="receipt_image" accept="image/*" class="form-input" required>
                 <p class="text-sm text-secondary mt-2">
-                    Supported formats: JPG, PNG, GIF. Upload a clear image of your receipt for reference.
+                    Supported formats: JPG, PNG, GIF, HEIC. Upload a clear image of your receipt for reference.
                 </p>
             </div>
 
@@ -108,9 +108,9 @@ document.querySelector('input[type="file"]').addEventListener('change', function
         }
         
         // Validate file type
-        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/heic', 'image/heif'];
         if (!allowedTypes.includes(file.type)) {
-            alert('Invalid file type. Please select a JPG, PNG, or GIF image.');
+            alert('Invalid file type. Please select a JPG, PNG, GIF, or HEIC image.');
             e.target.value = '';
             return;
         }
