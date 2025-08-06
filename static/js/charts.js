@@ -11,9 +11,7 @@ class BudgetCharts {
     // Initialize all charts
     initCharts() {
         this.initCategoryChart();
-        this.initSpendingTimeline();
-        this.initMonthlyComparison();
-        this.initBudgetProgress();
+        this.initDailySpending();
     }
 
     // Category Spending Pie Chart
@@ -65,14 +63,16 @@ class BudgetCharts {
         });
     }
 
-    // Spending Timeline Chart
-    initSpendingTimeline() {
-        const ctx = document.getElementById('timelineChart');
+
+
+    // Daily Spending Chart
+    initDailySpending() {
+        const ctx = document.getElementById('dailyChart');
         if (!ctx) return;
 
         const data = JSON.parse(ctx.dataset.chartData || '{}');
         
-        this.charts.timeline = new Chart(ctx, {
+        this.charts.daily = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: data.labels || [],
@@ -122,94 +122,7 @@ class BudgetCharts {
         });
     }
 
-    // Monthly Comparison Chart
-    initMonthlyComparison() {
-        const ctx = document.getElementById('monthlyChart');
-        if (!ctx) return;
 
-        const data = JSON.parse(ctx.dataset.chartData || '{}');
-        
-        this.charts.monthly = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.labels || [],
-                datasets: [{
-                    label: 'Monthly Spending',
-                    data: data.values || [],
-                    backgroundColor: this.colors[0],
-                    borderColor: '#ffffff',
-                    borderWidth: 1,
-                    borderRadius: 8,
-                    borderSkipped: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: { color: '#ffffff' }
-                    }
-                },
-                scales: {
-                    x: {
-                        ticks: { color: '#ffffff' },
-                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                    },
-                    y: {
-                        ticks: { 
-                            color: '#ffffff',
-                            callback: function(value) {
-                                return '$' + value.toFixed(0);
-                            }
-                        },
-                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                    }
-                }
-            }
-        });
-    }
-
-    // Budget Progress Chart
-    initBudgetProgress() {
-        const ctx = document.getElementById('budgetChart');
-        if (!ctx) return;
-
-        const data = JSON.parse(ctx.dataset.chartData || '{}');
-        
-        this.charts.budget = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: data.labels || [],
-                datasets: [{
-                    data: data.values || [],
-                    backgroundColor: data.colors || this.colors,
-                    borderWidth: 0,
-                    cutout: '70%'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.parsed;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((value / total) * 100).toFixed(1);
-                                return `${label}: ${percentage}%`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
 
     // Update chart data
     updateChart(chartName, newData) {

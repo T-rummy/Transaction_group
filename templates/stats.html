@@ -68,42 +68,15 @@
             </div>
         </div>
 
-        <!-- Monthly Spending Chart -->
+        <!-- Daily Spending Chart -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">📈 Monthly Spending Trend</h3>
-                <p class="card-subtitle">Spending patterns over time</p>
-            </div>
-            <div class="p-6">
-                <canvas id="monthlyChart" width="400" height="300"
-                        data-chart-data='{"labels": {{ monthly_labels|tojson }}, "values": {{ monthly_values|tojson }}}'></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Additional Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        <!-- Spending Timeline -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">📅 Daily Spending Timeline</h3>
+                <h3 class="card-title">📈 Daily Spending Trend</h3>
                 <p class="card-subtitle">Your spending over the last 30 days</p>
             </div>
             <div class="p-6">
-                <canvas id="timelineChart" width="400" height="300"
+                <canvas id="dailyChart" width="400" height="300"
                         data-chart-data='{"labels": {{ timeline_labels|tojson }}, "values": {{ timeline_values|tojson }}}'></canvas>
-            </div>
-        </div>
-
-        <!-- Budget Progress -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">🎯 Budget Progress</h3>
-                <p class="card-subtitle">How you're doing against your limits</p>
-            </div>
-            <div class="p-6">
-                <canvas id="budgetChart" width="400" height="300"
-                        data-chart-data='{"labels": {{ budget_labels|tojson }}, "values": {{ budget_values|tojson }}, "colors": {{ budget_colors|tojson }}}'></canvas>
             </div>
         </div>
     </div>
