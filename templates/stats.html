@@ -246,15 +246,15 @@ const categoryChart = new Chart(categoryCtx, {
     }
 });
 
-// Monthly Spending Chart
-const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-const monthlyChart = new Chart(monthlyCtx, {
+// Daily Spending Chart
+const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+const dailyChart = new Chart(dailyCtx, {
     type: 'line',
     data: {
-        labels: {{ monthly_labels|tojson }},
+        labels: {{ daily_labels|tojson }},
         datasets: [{
-            label: 'Monthly Spending',
-            data: {{ monthly_values|tojson }},
+            label: 'Daily Spending',
+            data: {{ daily_values|tojson }},
             borderColor: '#3bac72',
             backgroundColor: 'rgba(59, 172, 114, 0.1)',
             borderWidth: 3,
