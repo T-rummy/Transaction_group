@@ -398,6 +398,8 @@ body {
   position: relative;
   overflow: hidden;
   margin-bottom: var(--space-lg);
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 
 .card::before {
@@ -417,9 +419,10 @@ body {
 }
 
 .card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-8px) rotateX(5deg) rotateY(5deg);
   box-shadow: var(--shadow-xl), var(--shadow-glow);
   border-color: var(--border-accent);
+  animation: card-float 3s ease-in-out infinite;
 }
 
 .card-header {
@@ -718,6 +721,8 @@ body {
   transition: var(--transition-normal);
   position: relative;
   overflow: hidden;
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 
 .stat-card::before {
@@ -731,8 +736,9 @@ body {
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-8px) rotateX(5deg) rotateY(5deg);
   box-shadow: var(--shadow-xl);
+  animation: card-float 3s ease-in-out infinite;
 }
 
 .stat-value {
@@ -1035,6 +1041,21 @@ body {
     100% {
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.8);
+    }
+}
+
+@keyframes card-float {
+    0%, 100% {
+        transform: translateY(-8px) rotateX(5deg) rotateY(5deg);
+    }
+    25% {
+        transform: translateY(-12px) rotateX(3deg) rotateY(7deg);
+    }
+    50% {
+        transform: translateY(-6px) rotateX(7deg) rotateY(3deg);
+    }
+    75% {
+        transform: translateY(-10px) rotateX(4deg) rotateY(6deg);
     }
 }
 
