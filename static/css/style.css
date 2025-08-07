@@ -248,8 +248,8 @@ body {
 /* Mobile Navigation */
 .mobile-menu-toggle {
   display: none;
-  background: none;
-  border: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
   color: var(--text-primary);
   cursor: pointer;
   padding: var(--space-sm);
@@ -259,6 +259,7 @@ body {
 
 .mobile-menu-toggle:hover {
   background: var(--primary-glow);
+  border-color: var(--primary);
 }
 
 .hamburger {
