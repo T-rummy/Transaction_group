@@ -265,12 +265,47 @@
                     currentIndex++;
                 } else {
                     clearInterval(interval);
-                    // Redirect to main page after loading
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 1000);
+                    // Show manual navigation button instead of auto-redirect
+                    showNavigationButton();
                 }
             }, 500);
+        }
+
+        // Show navigation button after loading completes
+        function showNavigationButton() {
+            const loadingContainer = document.querySelector('.loading-container');
+            const navButton = document.createElement('button');
+            navButton.className = 'nav-button';
+            navButton.textContent = 'Enter Budget Buddy';
+            navButton.onclick = () => window.location.href = '/';
+            navButton.style.cssText = `
+                background: linear-gradient(45deg, #00ff88, #00ffff);
+                border: none;
+                color: #0a0a0a;
+                padding: 15px 30px;
+                font-size: 1.1rem;
+                font-weight: bold;
+                border-radius: 25px;
+                cursor: pointer;
+                margin-top: 20px;
+                box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+                transition: all 0.3s ease;
+                font-family: 'Courier New', monospace;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            `;
+            
+            navButton.addEventListener('mouseenter', () => {
+                navButton.style.transform = 'scale(1.05)';
+                navButton.style.boxShadow = '0 0 30px rgba(0, 255, 136, 0.8)';
+            });
+            
+            navButton.addEventListener('mouseleave', () => {
+                navButton.style.transform = 'scale(1)';
+                navButton.style.boxShadow = '0 0 20px rgba(0, 255, 136, 0.5)';
+            });
+            
+            loadingContainer.appendChild(navButton);
         }
 
         // Initialize everything
