@@ -1026,6 +1026,12 @@ def stats():
                              recent_transactions=[])
 
 
+# Loading Page
+@app.route('/loading')
+def loading():
+    """Display futuristic loading page."""
+    return render_template('loading.html')
+
 # QR Code Page
 @app.route('/qr')
 def qr_code():
