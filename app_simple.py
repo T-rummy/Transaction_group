@@ -7,7 +7,6 @@ from Transaction_pt2 import Transaction, FoodTransaction, TravelTransaction, Tra
 from achievements import AchievementSystem
 from werkzeug.utils import secure_filename
 from PIL import Image
-import pillow_heif
 import qrcode
 import io
 
@@ -96,25 +95,7 @@ def get_monthly_spending(category):
     
     return total
 
-def convert_heic_to_jpg(heic_path, jpg_path):
-    """Convert HEIC image to JPG format."""
-    try:
-        # Register HEIF opener with Pillow
-        pillow_heif.register_heif_opener()
-        
-        # Open HEIC image
-        with Image.open(heic_path) as img:
-            # Convert to RGB if necessary
-            if img.mode in ('RGBA', 'LA', 'P'):
-                img = img.convert('RGB')
-            
-            # Save as JPG
-            img.save(jpg_path, 'JPEG', quality=95)
-        
-        return True
-    except Exception as e:
-        print(f"Error converting HEIC to JPG: {e}")
-        return False
+
 
 # Website Notification Function
 def create_spending_alert(category, current_spending, limit, threshold_percentage):
@@ -379,21 +360,13 @@ def upload_receipt():
                     filepath = os.path.join(upload_folder, filename)
                     file.save(filepath)
                     
-                    # Check if it's a HEIC file and convert to JPG
+                    # Only accept common image formats
                     file_extension = filename.lower().split('.')[-1]
-                    if file_extension in ['heic', 'heif']:
-                        jpg_filename = f"{timestamp}_{filename.rsplit('.', 1)[0]}.jpg"
-                        jpg_filepath = os.path.join(upload_folder, jpg_filename)
-                        
-                        if convert_heic_to_jpg(filepath, jpg_filepath):
-                            # Remove original HEIC file
-                            os.remove(filepath)
-                            receipt_image = jpg_filename
-                        else:
-                            # If conversion fails, keep original file
-                            receipt_image = filename
-                    else:
+                    if file_extension in ['jpg', 'jpeg', 'png', 'gif', 'bmp']:
                         receipt_image = filename
+                    else:
+                        flash("Please upload a valid image file (JPG, PNG, GIF, BMP)")
+                        return redirect('/upload_receipt')
             
             # Create transaction
             transaction = Transaction(name, amount, date_str, category)
