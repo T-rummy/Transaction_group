@@ -6,9 +6,7 @@ from datetime import date
 from Transaction_pt2 import Transaction, FoodTransaction, TravelTransaction, TransportationTransaction, BillsUtilitiesTransaction, AcademicTransaction, HealthTransaction
 from achievements import AchievementSystem
 from werkzeug.utils import secure_filename
-from PIL import Image
 import qrcode
-import io
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -1044,7 +1042,7 @@ def qr_image():
         base_url = request.host_url.rstrip('/')
         main_page_url = f"{base_url}/"
         
-        # Create QR code
+        # Create QR code as SVG (no PIL required)
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -1054,15 +1052,10 @@ def qr_image():
         qr.add_data(main_page_url)
         qr.make(fit=True)
         
-        # Create image
-        img = qr.make_image(fill_color="black", back_color="white")
+        # Create SVG image
+        svg_string = qr.make_svg(fill_color="black", back_color="white")
         
-        # Convert to bytes
-        img_io = io.BytesIO()
-        img.save(img_io, 'PNG')
-        img_io.seek(0)
-        
-        return send_file(img_io, mimetype='image/png')
+        return svg_string, 200, {'Content-Type': 'image/svg+xml'}
         
     except Exception as e:
         print(f"Error generating QR code: {e}")
