@@ -1042,7 +1042,7 @@ def qr_image():
         base_url = request.host_url.rstrip('/')
         main_page_url = f"{base_url}/"
         
-        # Create QR code as SVG (no PIL required)
+        # Create QR code
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -1052,10 +1052,18 @@ def qr_image():
         qr.add_data(main_page_url)
         qr.make(fit=True)
         
-        # Create SVG image
-        svg_string = qr.make_svg(fill_color="black", back_color="white")
+        # Create simple SVG manually
+        matrix = qr.get_matrix()
+        size = len(matrix)
+        svg_size = size * 10  # 10px per module
         
-        return svg_string, 200, {'Content-Type': 'image/svg+xml'}
+        svg_content = f'''<?xml version="1.0" encoding="UTF-8"?>
+<svg width="{svg_size}" height="{svg_size}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="{svg_size}" height="{svg_size}" fill="white"/>
+    {''.join([f'<rect x="{x * 10}" y="{y * 10}" width="10" height="10" fill="black"/>' for y, row in enumerate(matrix) for x, cell in enumerate(row) if cell])}
+</svg>'''
+        
+        return svg_content, 200, {'Content-Type': 'image/svg+xml'}
         
     except Exception as e:
         print(f"Error generating QR code: {e}")
