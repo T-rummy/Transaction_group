@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, flash, url_for, jsonify
+from flask import Flask, render_template, request, redirect, flash, url_for, jsonify, send_file
 import csv
 import os
 import json
@@ -8,6 +8,8 @@ from achievements import AchievementSystem
 from werkzeug.utils import secure_filename
 from PIL import Image
 import pillow_heif
+import qrcode
+import io
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -1051,6 +1053,48 @@ def stats():
                              daily_values=[25.50, 45.20, 12.80, 67.90, 33.40],
                              category_stats=[],
                              recent_transactions=[])
+
+
+# QR Code Page
+@app.route('/qr')
+def qr_code():
+    """Display QR code that links to the main page."""
+    return render_template('qr.html')
+
+
+# QR Code Image Generation
+@app.route('/qr-image')
+def qr_image():
+    """Generate and serve QR code image."""
+    try:
+        # Get the base URL for the app
+        base_url = request.host_url.rstrip('/')
+        main_page_url = f"{base_url}/"
+        
+        # Create QR code
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(main_page_url)
+        qr.make(fit=True)
+        
+        # Create image
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        # Convert to bytes
+        img_io = io.BytesIO()
+        img.save(img_io, 'PNG')
+        img_io.seek(0)
+        
+        return send_file(img_io, mimetype='image/png')
+        
+    except Exception as e:
+        print(f"Error generating QR code: {e}")
+        return "Error generating QR code", 500
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))

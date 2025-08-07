@@ -32,12 +32,17 @@
                 <li><a href="{{ url_for('stats') }}" class="nav-link {{ 'active' if request.endpoint == 'stats' }}">Analytics</a></li>
                 <li><a href="{{ url_for('achievements') }}" class="nav-link {{ 'active' if request.endpoint == 'achievements' }}">🏆 Achievements</a></li>
                 <li><a href="{{ url_for('limits') }}" class="nav-link {{ 'active' if request.endpoint == 'limits' }}">Limits</a></li>
+                <li><a href="{{ url_for('qr_code') }}" class="nav-link {{ 'active' if request.endpoint == 'qr_code' }}">📱 QR Code</a></li>
 
             </ul>
 
             <!-- Mobile Menu Toggle -->
             <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-                Menu
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </button>
         </div>
     </nav>
@@ -165,7 +170,9 @@
         // Mobile Menu Toggle
         function toggleMobileMenu() {
             const menu = document.querySelector('.nav-menu');
+            const hamburger = document.querySelector('.hamburger');
             menu.classList.toggle('active');
+            hamburger.classList.toggle('active');
         }
 
         // Spending Alerts System

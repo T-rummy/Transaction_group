@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="qr-page">
+    <div class="qr-card">
+        <img src="{{ url_for('qr_image') }}" 
+             alt="QR Code for Budget Buddy" 
+             class="qr-code">
+    </div>
+</div>
+
+<style>
+.qr-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.qr-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 15px;
+}
+
+.qr-code {
+    width: 150px;
+    height: 150px;
+    display: block;
+}
+</style>
+{% endblock %} 
