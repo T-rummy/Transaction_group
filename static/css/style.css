@@ -89,7 +89,7 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%233bac72"><text x="12" y="18" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold">$</text></svg>') 12 12, auto;
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="%233bac72"><text x="16" y="24" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold">$</text></svg>') 16 16, auto;
 }
 
 /* Typography System */
@@ -1045,5 +1045,5 @@ body {
 
 /* Custom dollar sign cursor for interactive elements */
 .btn, .nav-link, .mobile-menu-toggle, a, button, input, select, textarea {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23feca57"><text x="12" y="18" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold">$</text></svg>') 12 12, pointer;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="%23feca57"><text x="16" y="24" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold">$</text></svg>') 16 16, pointer;
 }
