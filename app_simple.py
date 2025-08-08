@@ -188,7 +188,12 @@ def check_spending_limits(category, new_amount):
 
 @app.route('/')
 def index():
-    """Home page with dashboard overview."""
+    """Redirect to loading page first, then to main dashboard."""
+    return redirect(url_for('loading'))
+
+@app.route('/dashboard')
+def dashboard():
+    """Main dashboard page with overview."""
     try:
         # Get today's date
         today = date.today().strftime("%Y-%m-%d")
@@ -233,7 +238,7 @@ def index():
                              recent_transactions=recent_transactions)
                              
     except Exception as e:
-        print(f"Error in index route: {e}")
+        print(f"Error in dashboard route: {e}")
         return render_template('index.html', 
                              today=date.today().strftime("%Y-%m-%d"),
                              total_spending="0.00",
