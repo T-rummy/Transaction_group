@@ -194,7 +194,7 @@ body:not([data-theme="light"]) {
 .navbar {
   background: var(--bg-glass);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-primary);
+  border-bottom: 1px solid var(--border-secondary);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -213,10 +213,11 @@ body:not([data-theme="light"]) {
   gap: var(--space-md);
   text-decoration: none;
   transition: var(--transition-normal);
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-glass);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-md);
   backdrop-filter: blur(10px);
+  border: 1px solid var(--border-secondary);
 }
 
 .nav-brand:hover {
@@ -409,7 +410,7 @@ body:not([data-theme="light"]) {
 /* Card System */
 .card {
   background: var(--bg-card);
-  border: 1px solid var(--border-primary);
+  border: 1px solid var(--border-secondary);
   border-radius: var(--radius-xl);
   padding: var(--space-xl);
   transition: var(--transition-normal);
@@ -418,6 +419,7 @@ body:not([data-theme="light"]) {
   margin-bottom: var(--space-lg);
   transform-style: preserve-3d;
   perspective: 1000px;
+  box-shadow: var(--shadow);
 }
 
 .card::before {
@@ -544,8 +546,8 @@ body:not([data-theme="light"]) {
 .form-input {
   width: 100%;
   padding: var(--space-md);
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-secondary);
   border-radius: var(--radius-lg);
   color: var(--text-primary);
   font-size: 0.875rem;

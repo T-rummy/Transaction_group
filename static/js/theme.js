@@ -58,15 +58,21 @@ class ThemeManager {
         root.setAttribute('data-theme', theme);
         
         if (theme === 'light') {
-            root.style.setProperty('--bg-primary', '#ffffff');
-            root.style.setProperty('--bg-secondary', '#f8f9fa');
-            root.style.setProperty('--bg-glass', 'rgba(255, 255, 255, 0.1)');
-            root.style.setProperty('--text-primary', '#1a1a1a');
-            root.style.setProperty('--text-secondary', '#6c757d');
-            root.style.setProperty('--border-primary', 'rgba(59, 172, 114, 0.3)');
-            root.style.setProperty('--border-secondary', 'rgba(0, 0, 0, 0.1)');
-            root.style.setProperty('--shadow', '0 4px 6px rgba(0, 0, 0, 0.1)');
-            root.style.setProperty('--shadow-hover', '0 8px 25px rgba(0, 0, 0, 0.15)');
+            // Apple-inspired light mode colors
+            root.style.setProperty('--bg-primary', '#f5f5f7');
+            root.style.setProperty('--bg-secondary', '#ffffff');
+            root.style.setProperty('--bg-tertiary', '#f2f2f2');
+            root.style.setProperty('--bg-card', '#ffffff');
+            root.style.setProperty('--bg-glass', 'rgba(255, 255, 255, 0.8)');
+            root.style.setProperty('--text-primary', '#1d1d1f');
+            root.style.setProperty('--text-secondary', '#86868b');
+            root.style.setProperty('--text-tertiary', '#6e6e73');
+            root.style.setProperty('--border-primary', 'rgba(59, 172, 114, 0.2)');
+            root.style.setProperty('--border-secondary', '#d2d2d7');
+            root.style.setProperty('--shadow', '0 2px 8px rgba(0, 0, 0, 0.08)');
+            root.style.setProperty('--shadow-hover', '0 4px 16px rgba(0, 0, 0, 0.12)');
+            root.style.setProperty('--shadow-lg', '0 8px 24px rgba(0, 0, 0, 0.12)');
+            root.style.setProperty('--shadow-xl', '0 12px 32px rgba(0, 0, 0, 0.16)');
         } else {
             root.style.setProperty('--bg-primary', '#0a0a0a');
             root.style.setProperty('--bg-secondary', '#1a1a1a');
