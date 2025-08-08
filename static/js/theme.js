@@ -74,15 +74,21 @@ class ThemeManager {
             root.style.setProperty('--shadow-lg', '0 8px 24px rgba(0, 0, 0, 0.12)');
             root.style.setProperty('--shadow-xl', '0 12px 32px rgba(0, 0, 0, 0.16)');
         } else {
-            root.style.setProperty('--bg-primary', '#0a0a0a');
-            root.style.setProperty('--bg-secondary', '#1a1a1a');
-            root.style.setProperty('--bg-glass', 'rgba(26, 26, 26, 0.8)');
-            root.style.setProperty('--text-primary', '#ffffff');
-            root.style.setProperty('--text-secondary', '#a0a0a0');
-            root.style.setProperty('--border-primary', 'rgba(59, 172, 114, 0.5)');
-            root.style.setProperty('--border-secondary', 'rgba(255, 255, 255, 0.1)');
-            root.style.setProperty('--shadow', '0 4px 6px rgba(0, 0, 0, 0.3)');
+            // Original dark mode colors (unchanged)
+            root.style.setProperty('--bg-primary', '#1A1A1A');
+            root.style.setProperty('--bg-secondary', '#2D2D2D');
+            root.style.setProperty('--bg-tertiary', '#3A3A3A');
+            root.style.setProperty('--bg-card', '#2A2A2A');
+            root.style.setProperty('--bg-glass', 'rgba(42, 42, 42, 0.8)');
+            root.style.setProperty('--text-primary', '#FFFFFF');
+            root.style.setProperty('--text-secondary', '#E0E0E0');
+            root.style.setProperty('--text-tertiary', '#B0B0B0');
+            root.style.setProperty('--border-primary', '#404040');
+            root.style.setProperty('--border-secondary', '#505050');
+            root.style.setProperty('--shadow', '0 4px 6px -1px rgba(0, 0, 0, 0.1)');
             root.style.setProperty('--shadow-hover', '0 8px 25px rgba(0, 0, 0, 0.4)');
+            root.style.setProperty('--shadow-lg', '0 10px 15px -3px rgba(0, 0, 0, 0.1)');
+            root.style.setProperty('--shadow-xl', '0 20px 25px -5px rgba(0, 0, 0, 0.1)');
         }
         
         // Add transition class for smooth animation
