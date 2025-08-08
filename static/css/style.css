@@ -124,6 +124,12 @@ body:not([data-theme="light"]) {
   padding: 0 var(--space-md);
 }
 
+.main-content {
+  min-height: calc(100vh - 200px);
+  padding-top: var(--space-lg);
+  padding-bottom: var(--space-xl);
+}
+
 .grid {
   display: grid;
   gap: var(--space-md);
@@ -345,13 +351,19 @@ body:not([data-theme="light"]) {
 
 /* Hero Section */
 .hero {
-  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+  background: var(--bg-primary);
   padding: var(--space-3xl) 0;
   position: relative;
   overflow: hidden;
   min-height: 60vh;
   display: flex;
   align-items: center;
+}
+
+/* Dark mode gradient background for hero */
+[data-theme="dark"] .hero,
+.hero:not([data-theme="light"]) {
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
 }
 
 .hero::before {
