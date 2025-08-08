@@ -54,6 +54,9 @@ class ThemeManager {
     applyTheme(theme) {
         const root = document.documentElement;
         
+        // Set data-theme attribute for CSS selectors
+        root.setAttribute('data-theme', theme);
+        
         if (theme === 'light') {
             root.style.setProperty('--bg-primary', '#ffffff');
             root.style.setProperty('--bg-secondary', '#f8f9fa');
