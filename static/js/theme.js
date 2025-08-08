@@ -1,7 +1,7 @@
 // Theme Toggle System for Budget Buddy
 class ThemeManager {
     constructor() {
-        this.currentTheme = localStorage.getItem('theme') || 'dark';
+        this.currentTheme = localStorage.getItem('theme') || 'light';
         this.init();
     }
 
